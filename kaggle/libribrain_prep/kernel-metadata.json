@@ -1,0 +1,13 @@
+{
+  "id": "{KAGGLE_USERNAME}/innervoice-libribrain-prep",
+  "title": "innervoice-libribrain-prep",
+  "code_file": "libribrain_prep.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}
