@@ -1,0 +1,62 @@
+{
+ "encoder_params": 21016576,
+ "channels": 306,
+ "rows": [
+  {
+   "dtype": "float32",
+   "context_s": 15,
+   "time_tokens": 62,
+   "saved_GiB": 5.65,
+   "saved_GiB_grad_ckpt": 1.0
+  },
+  {
+   "dtype": "float32",
+   "context_s": 30,
+   "time_tokens": 125,
+   "saved_GiB": 11.39,
+   "saved_GiB_grad_ckpt": 2.01
+  },
+  {
+   "dtype": "float32",
+   "context_s": 60,
+   "time_tokens": 250,
+   "saved_GiB": 22.79,
+   "saved_GiB_grad_ckpt": 4.02
+  },
+  {
+   "dtype": "float32",
+   "context_s": 150,
+   "time_tokens": 625,
+   "saved_GiB": 56.96,
+   "saved_GiB_grad_ckpt": 10.04
+  },
+  {
+   "dtype": "bfloat16",
+   "context_s": 15,
+   "time_tokens": 62,
+   "saved_GiB": 3.33,
+   "saved_GiB_grad_ckpt": 0.71
+  },
+  {
+   "dtype": "bfloat16",
+   "context_s": 30,
+   "time_tokens": 125,
+   "saved_GiB": 6.72,
+   "saved_GiB_grad_ckpt": 1.42
+  },
+  {
+   "dtype": "bfloat16",
+   "context_s": 60,
+   "time_tokens": 250,
+   "saved_GiB": 13.45,
+   "saved_GiB_grad_ckpt": 2.85
+  },
+  {
+   "dtype": "bfloat16",
+   "context_s": 150,
+   "time_tokens": 625,
+   "saved_GiB": 33.62,
+   "saved_GiB_grad_ckpt": 7.12
+  }
+ ]
+}

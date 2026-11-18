@@ -1,0 +1,15 @@
+# shortcut: unpinned until the hello-GPU job reports Kaggle's torch version; pin then.
+torch
+numpy
+scipy
+scikit-learn
+pandas
+pyyaml
+mne
+einops
+huggingface_hub
+transformers
+peft
+matplotlib
+kaggle
+pytest

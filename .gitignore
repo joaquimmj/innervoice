@@ -1,0 +1,20 @@
+# secrets
+.env
+*.env
+kaggle.json
+**/secrets*
+# data, weights, caches
+data/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.fif
+*.h5
+*.npy
+*.npz
+embeddings_cache/
+__pycache__/
+.pytest_cache/
+# raw Kaggle outputs (curated metrics go in results/<run_id>/)
+results/raw/
