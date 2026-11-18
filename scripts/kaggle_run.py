@@ -25,6 +25,15 @@ def parse_status(out):
     return {"cancel_acknowledged": "cancelAcknowledged"}.get(s, s)
 
 
+def apply_overrides(code, sets):
+    for item in sets:
+        name, value = item.split("=", 1)
+        code, n = re.subn(rf"(?m)^{re.escape(name)} = .*$", lambda m: f"{name} = {value}", code)
+        if n != 1:
+            sys.exit(f"--set {name}: expected exactly one top-level assignment, found {n}")
+    return code
+
+
 def scan_for_secrets(folder):
     bad = [p for p in Path(folder).rglob("*") if p.is_file()
            and SECRET_RE.search(p.read_bytes().decode("utf-8", "ignore"))]
@@ -38,16 +47,27 @@ def main():
     ap.add_argument("job_dir")
     ap.add_argument("--poll", type=int, default=60)
     ap.add_argument("--timeout-h", type=float, default=12)
+    ap.add_argument("--slug", help="override the kernel slug (run the same script as another kernel)")
+    ap.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
+                    help="replace the top-level line 'NAME = ...' in the pushed copy of the script")
+    ap.add_argument("--no-wait", action="store_true", help="push and return")
     a = ap.parse_args()
     for v in ("KAGGLE_USERNAME", "KAGGLE_KEY"):
         if not os.environ.get(v):
             sys.exit(f"{v} is not set (PARTIE 0.6)")
     meta = json.loads((Path(a.job_dir) / "kernel-metadata.json").read_text())
     ref = meta["id"] = meta["id"].replace("{KAGGLE_USERNAME}", os.environ["KAGGLE_USERNAME"])
+    if a.slug:
+        ref = meta["id"] = f"{os.environ['KAGGLE_USERNAME']}/{a.slug}"
+        meta["title"] = a.slug
     with tempfile.TemporaryDirectory() as tmp:  # push a copy so the tracked metadata keeps the placeholder
         shutil.copytree(a.job_dir, tmp, dirs_exist_ok=True)
+        code = Path(tmp) / meta["code_file"]
+        code.write_text(apply_overrides(code.read_text(), a.set))
         (Path(tmp) / "kernel-metadata.json").write_text(json.dumps(meta))
         print(kaggle("kernels", "push", "-p", tmp).strip())
+    if a.no_wait:
+        return
     t0, status = time.time(), "unknown"
     while time.time() - t0 < a.timeout_h * 3600:
         time.sleep(a.poll)
@@ -55,7 +75,7 @@ def main():
         print(f"[{(time.time() - t0) / 60:.0f} min] {status}", flush=True)
         if status in DONE:
             break
-    out = ROOT / "results" / "raw" / Path(a.job_dir).name
+    out = ROOT / "results" / "raw" / (a.slug or Path(a.job_dir).name)
     out.mkdir(parents=True, exist_ok=True)
     kaggle("kernels", "output", ref, "-p", str(out))
     bad = scan_for_secrets(out)

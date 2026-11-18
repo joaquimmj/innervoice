@@ -25,3 +25,8 @@ def test_scan_deletes_leaked_outputs(tmp_path):
     (tmp_path / "ok.json").write_text("{}")
     bad = kaggle_run.scan_for_secrets(tmp_path)
     assert [b.name for b in bad] == ["log.txt"] and not (tmp_path / "log.txt").exists()
+
+
+def test_apply_overrides():
+    code = "A = 1\nB = 'x'\n    A = 5\n"
+    assert kaggle_run.apply_overrides(code, ["A=2"]) == "A = 2\nB = 'x'\n    A = 5\n"

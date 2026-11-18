@@ -8,10 +8,13 @@ Output tree (usable as `data.root` / `data.cache_dir` of MEG-XL's eval scripts b
   cache/*.h5                                                 same names/hash as MEG-XL's own cache
 Differences from MEG-XL's cache: float32 instead of float64 (disk limit). Everything else is their code.
 """
-import json, os, shutil, subprocess, sys, time, traceback
+import json, os, re, shutil, subprocess, sys, time, traceback
 
 MEGXL_COMMIT = "97da04171d22e8fe4822cfeb3047a57ecf86b318"
-REPO, SUBJECT = "pnpl/LibriBrain", "sub-0"
+REPO = "pnpl/LibriBrain"
+SUBJECT_RE = r"sub-0"  # regex on the subject part of the file name
+TASKS = None  # None = every task; else a list like ["Sherlock1"]
+SENSOR_REPO = "pnpl/LibriBrain"  # raw FIF used for sensor geometry (same scanner for all subjects)
 L_FREQ, H_FREQ, SFREQ = 0.1, 40.0, 50.0
 LIMIT = int(os.environ.get("PREP_LIMIT", "0"))  # >0: only the first N recordings (smoke test)
 W = "/kaggle/working" if os.path.isdir("/kaggle/working") else os.getcwd()
@@ -35,18 +38,20 @@ mne.set_log_level("ERROR")
 root, cache = f"{W}/LibriBrain", f"{W}/cache"
 os.makedirs(cache, exist_ok=True)
 files = [f.path for f in HfApi().list_repo_tree(REPO, repo_type="dataset", recursive=True)]
-h5s = sorted(p for p in files if p.endswith(".h5") and "/serialised/" in p and f"/{SUBJECT}_" in p)
+h5s = sorted(p for p in files if p.endswith(".h5") and "/serialised/" in p and re.search(rf"/({SUBJECT_RE})_", p)
+             and (TASKS is None or p.split("/")[0] in TASKS))
 if LIMIT:
     h5s = h5s[:LIMIT]
 
 
-def fetch(path):
-    return hf_hub_download(REPO, path, repo_type="dataset", local_dir=TMP)
+def fetch(path, repo=None):
+    return hf_hub_download(repo or REPO, path, repo_type="dataset", local_dir=TMP)
 
 
 # 1. Sensor geometry (position + orientation + coil type) from one raw FIF header; not shipped as JSON on the Hub.
-fif = next(p for p in sorted(files) if p.endswith("_meg.fif") and "proc-bads+headpos+sss+notch+bp+ds" in p)
-info = mne.io.read_info(fetch(fif))
+sensor_files = [f.path for f in HfApi().list_repo_tree(SENSOR_REPO, repo_type="dataset", recursive=True)]
+fif = next(p for p in sorted(sensor_files) if p.endswith("_meg.fif") and "proc-bads+headpos+sss+notch+bp+ds" in p)
+info = mne.io.read_info(fetch(fif, SENSOR_REPO))
 sensors = [dict(ch_name=c["ch_name"], loc=[float(x) for x in c["loc"]], coil_type=int(c["coil_type"]))
            for c in info["chs"] if c["ch_name"].startswith("MEG")]
 os.makedirs(root, exist_ok=True)
