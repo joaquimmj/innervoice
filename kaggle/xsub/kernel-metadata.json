@@ -1,0 +1,16 @@
+{
+  "id": "{KAGGLE_USERNAME}/innervoice-xsub",
+  "title": "innervoice-xsub",
+  "code_file": "xsub.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "joaquimmanjijung/innervoice-libribrain-prep",
+    "joaquimmanjijung/innervoice-libribrain2-prep"
+  ]
+}
