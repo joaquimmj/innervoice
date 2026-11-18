@@ -16,3 +16,6 @@
 - Maryland listened/imagined MEG is public (Zenodo 23895809, CC-BY-4.0, 18 subj) → Voie B unblocked (small vocab).
 - MEG-XL fine-tuning head (`CrissCrossWordEmbeddingExtractor`): 323 M params (306×512 → 2048 linear), vs 21 M encoder.
 - Phase 1 memory probe launched on Kaggle T4 (`kaggle/memory_probe`).
+- Phase 1 memory: 150 s full fine-tune fits on 2×T4 (8.8 + 6.0 GiB, 5.7 s/step); single T4 up to 120 s. See `reports/phase1.md`.
+- First probe run failed (v2 ckpt has extra hparam `debug_nan_checks`); fixed with our own loader. Kaggle GPU used: ~0.3 h (3 short jobs).
+- Next: accuracy reproduction on LibriBrain (needs a data subset: sub-0 h5 is 55 GiB, /kaggle/working has 19.5 GiB).

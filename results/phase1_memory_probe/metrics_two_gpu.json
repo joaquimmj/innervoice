@@ -1,0 +1,60 @@
+{
+ "gpu": "Tesla T4",
+ "vram_GiB": 14.6,
+ "torch": "2.11.0+cu130",
+ "megxl_commit": "97da04171d22e8fe4822cfeb3047a57ecf86b318",
+ "checkpoint": "pnpl/MEG-XL meg-xl-med-v2.ckpt",
+ "rows": [
+  {
+   "context_s": 150,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "head_dev": "cuda:1",
+   "peak_GiB": 8.82,
+   "peak_head_gpu_GiB": 6.04,
+   "step_s": 5.69,
+   "finite_loss": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "head_dev": "cuda:1",
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp32",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "head_dev": "cuda:1",
+   "peak_GiB": 12.59,
+   "peak_head_gpu_GiB": 7.25,
+   "step_s": 17.49,
+   "finite_loss": true
+  },
+  {
+   "context_s": 90,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 10.21,
+   "peak_head_gpu_GiB": null,
+   "step_s": 3.91,
+   "finite_loss": true
+  },
+  {
+   "context_s": 120,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 11.92,
+   "peak_head_gpu_GiB": null,
+   "step_s": 5.28,
+   "finite_loss": true
+  }
+ ]
+}
