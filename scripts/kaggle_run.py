@@ -12,7 +12,7 @@ DONE = {"complete", "error", "cancelAcknowledged"}
 
 
 def kaggle(*args):
-    r = subprocess.run(["kaggle", *args], capture_output=True, text=True)
+    r = subprocess.run(["kaggle", *args], capture_output=True, text=True, timeout=300)  # CLI can hang on network stalls
     if r.returncode:
         sys.exit(f"kaggle {args[0]} {args[1]} failed: {r.stderr.strip()[-500:]}")
     return r.stdout

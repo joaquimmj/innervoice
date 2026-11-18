@@ -18,12 +18,25 @@ sys.path.insert(0, src)
 import torch
 import torch.nn.functional as F
 from huggingface_hub import hf_hub_download
+import inspect
 from brainstorm.evaluate_criss_cross_word_classification import (
-    CrissCrossWordEmbeddingExtractor, load_criss_cross_model, load_tokenizer, map_raw_to_encoded_timesteps)
+    CrissCrossWordEmbeddingExtractor, load_tokenizer, map_raw_to_encoded_timesteps)
+from brainstorm.models.criss_cross_transformer import CrissCrossTransformerModule
 
-dev = "cuda"
+
+def load_criss_cross_model(path, tok, device):
+    # Same as MEG-XL's loader, but drops hparams the pinned code does not know (v2 ckpt adds 'debug_nan_checks').
+    ck = torch.load(path, map_location="cpu", weights_only=False)
+    known = set(inspect.signature(CrissCrossTransformerModule.__init__).parameters)
+    model = CrissCrossTransformerModule(tokenizer=tok, **{k: v for k, v in ck["hyper_parameters"].items() if k in known})
+    sd = {k: v for k, v in ck["state_dict"].items() if "rope_embedding_layer.rotate" not in k}
+    missing, unexpected = model.load_state_dict(sd, strict=False)
+    assert not unexpected and all("rope" in k or k.startswith("tokenizer") for k in missing), (missing, unexpected)
+    return model.to(device)
+
+dev = "cuda" if torch.cuda.is_available() else "cpu"
 torch.manual_seed(0)
-ckpt = hf_hub_download("pnpl/MEG-XL", "meg-xl-med-v2.ckpt", local_dir=f"{W}/ckpt")
+ckpt = hf_hub_download("pnpl/MEG-XL", "meg-xl-med-v2.ckpt", local_dir="/tmp/ckpt")  # outside /kaggle/working: not an output
 C, SFREQ, WORD_S = 306, 50, 3.0
 
 
