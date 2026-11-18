@@ -1,0 +1,13 @@
+{
+  "id": "{KAGGLE_USERNAME}/innervoice-memory-probe",
+  "title": "innervoice-memory-probe",
+  "code_file": "memory_probe.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}
