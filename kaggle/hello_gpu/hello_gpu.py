@@ -23,7 +23,7 @@ except Exception as e:  # report the failure type only
 
 if gh:
     r = subprocess.run(["git", "clone", "-q", "--depth", "1", "-b", "dev",
-                        f"https://x-access-token:{gh}@github.com/joaquimmj/nervegear.git", "/kaggle/working/repo"],
+                        f"https://x-access-token:{gh}@github.com/joaquimmj/innervoice.git", "/kaggle/working/repo"],
                        capture_output=True, text=True)
     res["repo_clone_ok"] = r.returncode == 0
     shutil.rmtree("/kaggle/working/repo", ignore_errors=True)  # keep token-bearing .git/config out of outputs

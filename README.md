@@ -1,4 +1,4 @@
-# nervegear
+# innervoice
 
 Cross-subject MEG word decoding with minimal calibration.
 
