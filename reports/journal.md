@@ -19,3 +19,13 @@
 - Phase 1 memory: 150 s full fine-tune fits on 2×T4 (8.8 + 6.0 GiB, 5.7 s/step); single T4 up to 120 s. See `reports/phase1.md`.
 - First probe run failed (v2 ckpt has extra hparam `debug_nan_checks`); fixed with our own loader. Kaggle GPU used: ~0.3 h (3 short jobs).
 - Next: accuracy reproduction on LibriBrain (needs a data subset: sub-0 h5 is 55 GiB, /kaggle/working has 19.5 GiB).
+
+## 2026-11-18 (night) — pivot of the base model, data prepared
+- Decision (delegated by Joaquim): do not spend >= 40 GPU-h reproducing MEG-XL's single-subject number. Evidence:
+  on unseen subjects MEG-XL scores 0.43 (PNPL Broad reference) while a 5 M-param CNN + sentence transformer trained
+  on sub-0 only scores 0.66 zero-shot (rohit-ravi2/libribrain-2026, MIT). Base model for Voie A = that family;
+  MEG-XL stays a baseline. Phase 1 memory result stands on its own.
+- Data prep on Kaggle CPU (no GPU quota): sub-0 91/91 recordings, 53.8 h, 11.05 GiB cache; sub-1…12 24/24 recordings,
+  9.7 h (~48 min each), 2.0 GiB. Sub-13…32 live in `serialised_competition` (first halves): not prepared yet.
+- `kaggle/xsub/xsub.py`: train sub-0 (Sherlock2–7), zero-shot test on sub-5…12 (val sub-1…4), retrieval over
+  50/250/1000 words + unseen word types, permuted-label control. Launched.

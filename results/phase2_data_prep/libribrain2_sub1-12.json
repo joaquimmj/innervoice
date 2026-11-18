@@ -1,0 +1,176 @@
+{
+ "megxl_commit": "97da04171d22e8fe4822cfeb3047a57ecf86b318",
+ "recordings": [
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-10_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-10_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 25.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-11_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-11_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-12_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-12_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-1_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-1_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-2_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-2_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-3_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-3_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 25.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-4_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-4_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 25.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-5_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-5_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 25.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-6_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-6_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-7_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 26.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-7_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 25.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-8_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-8_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-9_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised/sub-9_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 24.9,
+   "finite": true
+  }
+ ],
+ "hours": 9.72,
+ "cache_GiB": 2.0,
+ "disk_free_GiB": 17.5
+}
