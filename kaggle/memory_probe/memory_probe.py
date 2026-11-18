@@ -40,14 +40,15 @@ ckpt = hf_hub_download("pnpl/MEG-XL", "meg-xl-med-v2.ckpt", local_dir="/tmp/ckpt
 C, SFREQ, WORD_S = 306, 50, 3.0
 
 
-def probe(context_s, precision, grad_ckpt, freeze_encoder, steps=3):
+def probe(context_s, precision, grad_ckpt, freeze_encoder, head_dev=None, steps=3):
+    head_dev = head_dev or dev
     torch.cuda.empty_cache()
     tok = load_tokenizer(f"{src}/brainstorm/neuro_tokenizers/biocodec_ckpt.pt", dev)
     model = load_criss_cross_model(ckpt, tok, dev)
     model.train()
     if grad_ckpt:
         model.enable_gradient_checkpointing()
-    mlp = CrissCrossWordEmbeddingExtractor(num_channels=C).to(dev).train()
+    mlp = CrissCrossWordEmbeddingExtractor(num_channels=C).to(head_dev).train()
     params = list(mlp.parameters()) + ([] if freeze_encoder else
                                        [p for n, p in model.named_parameters() if not n.startswith("tokenizer")])
     if freeze_encoder:
@@ -59,9 +60,10 @@ def probe(context_s, precision, grad_ckpt, freeze_encoder, steps=3):
     meg = torch.randn(1, C, T, device=dev) * 1e-12
     xyz, abc = torch.randn(1, C, 3, device=dev), F.normalize(torch.randn(1, C, 3, device=dev), dim=-1)
     types, mask = (torch.arange(C, device=dev) % 3 == 2).long()[None], torch.ones(1, C, device=dev, dtype=torch.bool)
-    targets = torch.randn(n_words, 1024, device=dev)
+    targets = torch.randn(n_words, 1024, device=head_dev)
     dtype = {"fp16": torch.float16, "bf16": torch.bfloat16}.get(precision)
-    torch.cuda.reset_peak_memory_stats()
+    for i in range(torch.cuda.device_count()):
+        torch.cuda.reset_peak_memory_stats(i)
     times = []
     for _ in range(steps):
         torch.cuda.synchronize(); t0 = time.time()
@@ -71,24 +73,25 @@ def probe(context_s, precision, grad_ckpt, freeze_encoder, steps=3):
             embs = []
             for i in range(n_words):
                 s, e = map_raw_to_encoded_timesteps(int(i * WORD_S * SFREQ), int((i + 1) * WORD_S * SFREQ))
-                embs.append(mlp(feats[0, :, s:e, :]))
+                embs.append(mlp(feats[0, :, s:e, :].to(head_dev)))
             z = F.normalize(torch.stack(embs).float(), dim=-1)
-            loss = F.cross_entropy(z @ F.normalize(targets, dim=-1).T / 0.07, torch.arange(n_words, device=dev))
+            loss = F.cross_entropy(z @ F.normalize(targets, dim=-1).T / 0.07, torch.arange(n_words, device=head_dev))
         opt.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
         scaler.step(opt); scaler.update()
         torch.cuda.synchronize(); times.append(time.time() - t0)
-    return dict(peak_GiB=round(torch.cuda.max_memory_allocated() / 2**30, 2),
+    return dict(peak_GiB=round(torch.cuda.max_memory_allocated(0) / 2**30, 2),
+                peak_head_gpu_GiB=round(torch.cuda.max_memory_allocated(head_dev) / 2**30, 2) if head_dev != dev else None,
                 step_s=round(sum(times[1:]) / max(1, len(times) - 1), 2), finite_loss=bool(torch.isfinite(loss)))
 
 
-configs = []
-for ctx in (15, 30, 60, 150):
-    for prec in ("fp32", "fp16"):
-        for gc in (False, True):
-            configs.append(dict(context_s=ctx, precision=prec, grad_ckpt=gc, freeze_encoder=False))
-configs += [dict(context_s=150, precision="bf16", grad_ckpt=True, freeze_encoder=False),
-            dict(context_s=150, precision="fp16", grad_ckpt=False, freeze_encoder=True)]
+# v1 grid (15-150 s x fp32/fp16 x ckpt, head on GPU 0) is in results/phase1_memory_probe/metrics.json.
+# v2: 150 s with the 323 M-param word MLP on the second T4.
+configs = [dict(context_s=150, precision="fp16", grad_ckpt=True, freeze_encoder=False, head_dev="cuda:1"),
+           dict(context_s=150, precision="fp16", grad_ckpt=False, freeze_encoder=False, head_dev="cuda:1"),
+           dict(context_s=150, precision="fp32", grad_ckpt=True, freeze_encoder=False, head_dev="cuda:1"),
+           dict(context_s=90, precision="fp16", grad_ckpt=True, freeze_encoder=False),
+           dict(context_s=120, precision="fp16", grad_ckpt=True, freeze_encoder=False)]
 
 gpu = torch.cuda.get_device_properties(0)
 out = dict(gpu=gpu.name, vram_GiB=round(gpu.total_memory / 2**30, 1), torch=torch.__version__,

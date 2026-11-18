@@ -1,0 +1,162 @@
+{
+ "gpu": "Tesla T4",
+ "vram_GiB": 14.6,
+ "torch": "2.11.0+cu130",
+ "megxl_commit": "97da04171d22e8fe4822cfeb3047a57ecf86b318",
+ "checkpoint": "pnpl/MEG-XL meg-xl-med-v2.ckpt",
+ "rows": [
+  {
+   "context_s": 15,
+   "precision": "fp32",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 15,
+   "precision": "fp32",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 7.86,
+   "step_s": 1.4,
+   "finite_loss": true
+  },
+  {
+   "context_s": 15,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": 7.32,
+   "step_s": 0.47,
+   "finite_loss": true
+  },
+  {
+   "context_s": 15,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 6.49,
+   "step_s": 0.55,
+   "finite_loss": true
+  },
+  {
+   "context_s": 30,
+   "precision": "fp32",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 30,
+   "precision": "fp32",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 8.23,
+   "step_s": 2.76,
+   "finite_loss": true
+  },
+  {
+   "context_s": 30,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": 13.37,
+   "step_s": 1.07,
+   "finite_loss": true
+  },
+  {
+   "context_s": 30,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 7.02,
+   "step_s": 1.1,
+   "finite_loss": true
+  },
+  {
+   "context_s": 60,
+   "precision": "fp32",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 60,
+   "precision": "fp32",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 10.01,
+   "step_s": 5.78,
+   "finite_loss": true
+  },
+  {
+   "context_s": 60,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 60,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": 8.51,
+   "step_s": 2.21,
+   "finite_loss": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp32",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp32",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "bf16",
+   "grad_ckpt": true,
+   "freeze_encoder": false,
+   "peak_GiB": null,
+   "oom": true
+  },
+  {
+   "context_s": 150,
+   "precision": "fp16",
+   "grad_ckpt": false,
+   "freeze_encoder": true,
+   "peak_GiB": 8.24,
+   "step_s": 2.24,
+   "finite_loss": true
+  }
+ ]
+}
