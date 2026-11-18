@@ -27,3 +27,15 @@ Findings
 - Not measured: bf16 (emulated on T4), accuracy impact of fp16 vs the authors' bf16, time per epoch on real data.
 
 Next: reproduce the paper's word-decoding accuracy with this configuration (GO/STOP criterion of Phase 1).
+
+## Time, not memory, is the binding constraint (estimate, 2026-11-18)
+Target to reproduce (paper Table 1, LibriBrain, 13 % of training data): **57.3 ± 0.4 %** top-10 balanced accuracy
+over the 50 most frequent words (19.8 ± 0.4 % over 250). Read from arXiv 2602.02494v2 HTML.
+- LibriBrain sub-0: 91 recordings, 505 225 words → 10 058 segments of 50 words (counted from the events files).
+  Vocabulary 17 348 words; top-50 / 250 / 1000 words cover 47 % / 68 % / 82 % of tokens.
+- 13 % of the 80 % train split ≈ 1 050 segments × 5.7 s ≈ **1.7 h per epoch**, plus val + test passes every epoch
+  (~1 000 segments each, forward only) → roughly 2.5 h per epoch on 2 × T4. Paper schedule: up to 50 epochs,
+  patience 10. A faithful run is therefore ≥ 40 GPU-hours, above one week of Kaggle quota (~30 h, unverified).
+- Authors: 12 h on one H100 for 30–50 h of data.
+- Ambiguity: the released config lists `all_sessions: ses-1…ses-10` (378 k words) while the paper says 52 h
+  (all 15 sessions). We use all sessions.
