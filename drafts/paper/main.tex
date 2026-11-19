@@ -1,0 +1,84 @@
+% DRAFT — not for submission. Numbers come from results/phase3_*; regenerate with scripts/analyze_calibration.py.
+% Every reference marked [to verify] must be read in full before submission.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs,hyperref}
+\title{Ten Minutes of Shared Listening: Label-Free Functional Alignment\\ for Timing-Free MEG Word Decoding in New Subjects}
+\author{Joaquim Manji-Jung\\ Paris}
+\date{Draft, November 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Non-invasive decoders of heard words are usually trained and tested on the same person, and recent work showed
+that much of the reported accuracy of contextual decoders comes from word timing leaked by overlapping input
+windows rather than from brain activity \cite{jayalath2026shortcuts}. We study the setting that matters for
+patients: a \emph{new} person, a decoder free of the timing shortcut, and a few minutes of calibration.
+On LibriBrain100 \cite{libribrain100}, a decoder trained on one subject and applied one word window at a time
+transfers weakly to 28 never-seen subjects (24.9\% balanced top-10 accuracy over 50 words, chance 20\%).
+Supervised fine-tuning on the new subject's first minutes helps (+2.7 points with 5 minutes, +6.3 with 10).
+Because all subjects heard the same audiobook, we instead fit a linear ridge map from the new subject's sensors to
+the training subject's sensors on stimulus-locked windows of the shared audio, using no word labels and no decoder
+training. This gives +4.4 points with 5 minutes (24/28 subjects improved) and +6.5 with 10 minutes, significantly
+better than supervised fine-tuning at 5 minutes (+1.7 [0.5, 2.9]). Controls show that the gain requires
+stimulus-locked correspondence: the same map fitted on randomly paired windows lowers accuracy (−2.9), and matching
+sensor covariances alone has no effect. Combined with fine-tuning, 10 minutes reach 32.0\%. We also report negative
+results (repeated observations, more short-recording training subjects, label-free normalisation) and an
+independent replication of the timing shortcut. Absolute accuracy remains low; we discuss what this implies for
+calibration-light speech interfaces.
+\end{abstract}
+
+\section{Introduction}
+% TODO: motivation (ALS, locked-in), gap: new subjects + no timing shortcut + minutes of data.
+% Contributions: (1) replication of the timing shortcut with top-10 @50/@250 and a shift vs random-time control;
+% (2) a seeded, text-disjoint calibration curve for a timing-free decoder on 28 unseen subjects;
+% (3) label-free stimulus-locked alignment beats supervised calibration at 5 min, with pairing and covariance controls;
+% (4) documented negative results; (5) MEG-XL fine-tuning on two 16 GB GPUs (appendix).
+
+\section{Related work}
+% Contextual word decoding \cite{dascoli2025} [to verify]; MEG-XL \cite{megxl}; timing shortcut \cite{jayalath2026shortcuts};
+% LibriBrain100 and the PNPL 2026 competition \cite{libribrain100,pnpl2026};
+% functional alignment / hyperalignment: fMRI decoder reuse via ridge to a reference subject \cite{ferrante2024} [abstract read],
+% Haxby 2011, Chen 2015 (SRM), Thual 2023, Heo 2026 (ECoG) [to verify];
+% public LibriBrain null result of the same recipe (rohit-ravi2/libribrain-2026, P1b) — must be discussed.
+
+\section{Data and protocol}
+% sub-0 training text (Sherlock 2–7, 454k words) disjoint from the test book (Sherlock 1); validation subjects
+% 19–22; test subjects 1–18, 23–32; calibration on recording A, evaluation on recording B (5-gram overlap 0.6 %).
+% Metric: balanced top-10 over the 50/250 most frequent training words; 3 seeds; bootstrap CIs over subjects.
+
+\section{Method}
+% Decoder: 3.6 M-param CNN on one 3 s window, contrastive to frozen T5-large word embeddings.
+% Alignment: W = C_{yx} (C_{xx} + \lambda \bar\sigma^2 I)^{-1} on windows paired through the shared stimulus.
+
+\section{Results}
+\begin{table}[h]\centering
+\begin{tabular}{lcc}\toprule
+Gain vs zero-shot, 50 words & 5 min (28 subj.) & 10 min (18 subj.)\\\midrule
+Ridge alignment (no labels) & +4.41 [+2.74, +6.03] & +6.52 [+4.77, +8.30]\\
+Random pairing (control) & $-$2.88 [$-$4.10, $-$1.73] & $-$1.58 [$-$3.27, +0.03]\\
+Supervised fine-tune & +2.70 [+1.80, +3.58] & +6.30 [+4.90, +7.73]\\
+Alignment + fine-tune & +2.26 [+0.61, +3.85] & +7.48 [+5.51, +9.33]\\\bottomrule
+\end{tabular}
+\caption{28 never-seen subjects, mean of 3 seeds, 95\% bootstrap CI over subjects (results/phase3\_wide\_v1).}
+\end{table}
+% TODO: covariance-only and Procrustes controls (phase3_alignment_v2, phase3_weak_v1); calibration curve to 20 min;
+% shortcut replication table (phase2); negative results; more-data / ensemble run (phase3_data_v1, pending).
+
+\section{Limitations and ethics}
+% Perceived speech only; same audio required for alignment; one training subject; one book; low absolute accuracy;
+% LibriBrain CC-BY-NC-4.0; consent; no mind-reading claims.
+
+\section*{Acknowledgments and AI usage}
+% Honest statement: experiments, code and drafting were carried out with an AI coding assistant under the author's
+% direction; all numbers are reproducible from the public repository. Adapt to the venue's policy.
+
+\begin{thebibliography}{9}
+\bibitem{jayalath2026shortcuts} D.~Jayalath, O.~Parker Jones. Removing Timing Shortcuts Improves Non-Invasive Brain-to-Text. arXiv:2609.40359, 2026.
+\bibitem{megxl} D.~Jayalath, O.~Parker Jones. MEG-XL: Data-Efficient Brain-to-Text via Long-Context Pre-Training. ICML 2026, arXiv:2602.02494.
+\bibitem{libribrain100} F.~Mantegna et al. LibriBrain100. arXiv:2608.25204, 2026.
+\bibitem{pnpl2026} The 2026 PNPL competition. arXiv:2609.03231, 2026.
+\bibitem{ferrante2024} M.~Ferrante et al. Through their eyes: multi-subject brain decoding with simple alignment techniques. arXiv:2309.00627 [to verify].
+\bibitem{dascoli2025} S.~d'Ascoli et al. Decoding individual words from non-invasive brain recordings. Nat.\ Commun.\ 2025 [to verify].
+\end{thebibliography}
+\end{document}
