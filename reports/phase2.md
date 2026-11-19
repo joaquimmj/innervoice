@@ -40,4 +40,4 @@ Controls (50 words; chance 20):
 - The timing-only model is given annotated word *duration*, which a MEG model cannot read directly; an ablation
   with onset gaps only is missing.
 - One training subject, one test book shared by all test subjects (subject SD understates uncertainty), no CIs yet.
-- Novelty not yet checked for this specific finding (rule 1).
+- **Novelty: already published** (arXiv 2609.40359, Oxford PNPL, 2026-09-30). Our result is an independent replication. See `novelty_log.md`.

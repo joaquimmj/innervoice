@@ -36,3 +36,6 @@
 - Honest brain-only (one word at a time): 26.8 % / 6.2 % (chance 20 / 4), controls at chance. See `reports/phase2.md`.
 - Kaggle GPU used so far: ~3 h (probes 0.3, xsub runs 0.3 + 1.1 + 1.1). Container restarted 3 times; Kaggle jobs unaffected.
 - Next: novelty check of the timing finding; gap-only timing ablation; test the confound on MEG-XL's own pipeline.
+- Novelty check: the timing confound was published by Oxford on 2026-09-30 (arXiv 2609.40359, SimpleB2T). STOP on that
+  claim (rule 1). What is left open, to our knowledge: timing-free decoding on never-seen subjects with <= 10 min of
+  calibration (our single-word baseline: 26.8 % @50 zero-shot vs 38-44 % in-subject), and imagined speech (Maryland data).
