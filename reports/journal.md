@@ -107,3 +107,7 @@ sub-13…32 are prepared).
 ## 2026-11-19 14:45 UTC — identity shrinkage
 - ‖W − I‖² penalty: works when weak (+3.6), vanishes when strong (λ ≥ 1). Plausible but unverified cause of the public null.
 - Kaggle GPU used so far: ~16 h. 28-subject run still in progress.
+
+## 2026-11-19 15:20 UTC — alignment replicates on 28 subjects
+- 5 min: alignment +4.4 (24/28) vs supervised +2.7; alignment − supervised +1.7 [+0.5, +2.9]. 10 min: +6.5 vs +6.3.
+- Running: more-data run (sub-0 ~78 h) with seed ensemble. Kaggle GPU used so far: ~18 h.

@@ -13,3 +13,4 @@
 | phase3_alignment_v2 | 3 | Alignment controls, 8 unseen subjects, 3 seeds, @50 | align − random pairing: +7.7 / +8.1 / +8.0 (5/10/20 min, 8/8); align − covariance-only: +4.1 / +4.5 / +5.8 (8/8) | commit f6d9558 |
 | phase3_weak_v1 | 3 | Weak (600-step) decoder, 10 min, @50 | ridge align +4.46 (8/8); random pairing −3.50; Procrustes +0.10; supervised +1.76 | commit d83a868 |
 | phase3_identity_v1 | 3 | Identity-shrinkage alignment, 10 min, @50 | λ 0.01 / 0.1 / 1 / 10: +3.59 / +2.56 / +0.02 / −0.12 (shrink-to-zero +4.32) | commit 0266b10 |
+| phase3_wide_v1 | 3 | 28 unseen subjects, @50 | align 5 min +4.41 (24/28), 10 min +6.52 (17/18); random pairing −2.88 / −1.58; supervised +2.70 / +6.30; align+ft 10 min +7.48 → 32.0 % | commit d83a868 |

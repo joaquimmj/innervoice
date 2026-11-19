@@ -101,6 +101,24 @@ Shrinking towards the identity works when weak and vanishes when strong (the map
 effective penalty is a plausible explanation of the public null, but their λ is not on our scale (unverified):
 **the null is not explained yet**.
 
+### 1f. Replication on 28 never-seen subjects (`results/phase3_wide_v1`, commit d83a868)
+Test = sub-1…18 and sub-23…32 (validation sub-19…22 unchanged). 5 min: all 28 subjects; 10 min: the 18 subjects
+whose first recording lasts ≥ 10 min. Zero-shot 24.9 % / 5.7 %. 3 seeds. `python scripts/analyze_calibration.py`.
+
+| Gain vs zero-shot, 50 words | 5 min (28 subjects) | 10 min (18 subjects) |
+|---|---|---|
+| ridge alignment (no labels, decoder frozen) | **+4.41 [+2.74, +6.03]** 24/28 | **+6.52 [+4.77, +8.30]** 17/18 |
+| random pairing (control) | −2.88 [−4.10, −1.73] 5/28 | −1.58 [−3.27, +0.03] 6/18 |
+| supervised fine-tune | +2.70 [+1.80, +3.58] 25/28 | +6.30 [+4.90, +7.73] 18/18 |
+| alignment + fine-tune | +2.26 [+0.61, +3.85] | **+7.48 [+5.51, +9.33] → 32.0 %** 17/18 |
+| alignment − random pairing | +7.29 [+5.80, +8.67] 26/28 | +8.10 [+6.92, +9.48] 18/18 |
+| alignment − supervised | **+1.71 [+0.51, +2.86]** 21/28 | +0.22 [−0.94, +1.30] 9/18 |
+
+At 250 words: alignment +1.04 (5 min) / +1.27 (10 min); supervised +1.22 / +2.09; alignment + fine-tune +1.32 / +2.19.
+**The alignment result replicates on 3.5× more subjects**: stimulus-paired alignment without labels is significantly
+better than supervised fine-tuning with 5 minutes at 50 words, equal at 10 minutes; supervised is better at 250
+words with 10 minutes (−0.82 [−1.39, −0.27]).
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.
