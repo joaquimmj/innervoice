@@ -58,7 +58,7 @@ if SMOKE:
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
     CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4),
-                ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("procrustes", 0, 0.1), ("alignid", 0, 0.1)]
+                ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("procrustes", 0, 0.1), ("alignid", 0, 0.1), ("alignemb", 3, 1e-3)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -322,6 +322,16 @@ def _sqrtm(c, inv=False):
     return (v * (w ** (-0.5 if inv else 0.5))) @ v.T
 
 
+def paired_windows(cal):
+    """(new-subject window, sub-0 window) pairs at the same moment of the shared audio."""
+    new, ref = [], []
+    for r, (i,) in cal:
+        hit = align_index.get(tuple(w for w, *_ in r["words"][i:i + NGRAM]))
+        if hit:
+            new.append((r, [i])); ref.append((hit[0], [hit[1]]))
+    return new, ref
+
+
 def fit_alignment(cal, lam, mode="align"):
     """Ridge map W (306x306) with W @ x_new ~ x_sub0 on word-locked windows of the same audio. No word labels used:
     words only provide the common timeline of the stimulus. Returns (W, n_pairs, median onset-interval mismatch in s)."""
@@ -361,8 +371,16 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model.load_state_dict(state)
     model.eval()
     info = {}
-    if method.startswith("align") or method in ("coral", "procrustes"):  # includes alignid
-        W, n_pairs, dt = fit_alignment(cal, lr if method != "alignfull" else 0.1, "align" if method == "alignfull" else method)
+    if method == "alignemb":  # teacher = frozen decoder on sub-0's windows of the same moments (before BN recalibration)
+        new_w, ref_w = paired_windows(cal)
+        teacher = []
+        with torch.no_grad():
+            for b in range(0, len(ref_w), 256):
+                x, _, gi, pad, tf = batch(ref_w[b:b + 256]); teacher.append(model(x, gi, pad, tf).float())
+        teacher = torch.cat(teacher) if teacher else None
+    if method.startswith("align") or method in ("coral", "procrustes"):  # includes alignid, alignemb
+        W, n_pairs, dt = fit_alignment(cal, lr if method in ("align", "alignid", "alignshuf", "coral", "procrustes") else 0.1,
+                                       method if method in ("align", "alignid", "alignshuf", "coral", "procrustes") else "align")
         if W is None:
             return None
         model.A = nn.Parameter(W, requires_grad=False)
@@ -382,6 +400,17 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
             model.A = nn.Parameter(torch.eye(306, device=dev))
         if method == "alignfull":
             model.A.requires_grad_(True)
+        if method == "alignemb":  # label-free: only the input map moves, towards the teacher's embeddings
+            model.requires_grad_(False); model.A.requires_grad_(True)
+            opt = torch.optim.AdamW([model.A], lr=lr, weight_decay=0.0)
+            r = np.random.default_rng(seed)
+            for _ in range(steps):
+                idx = r.integers(0, len(new_w), min(256, len(new_w)))
+                x, _, gi, pad, tf = batch([new_w[i] for i in idx])
+                loss = (1 - (model(x, gi, pad, tf) * teacher[torch.as_tensor(idx, device=dev)]).sum(-1)).mean()
+                opt.zero_grad(set_to_none=True); loss.backward(); opt.step()
+            steps = 0
+    if steps:
         opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0)
         r = np.random.default_rng(seed)
         for _ in range(steps):  # eval mode: fixed BatchNorm statistics, no dropout
