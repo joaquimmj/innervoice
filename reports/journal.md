@@ -29,3 +29,10 @@
   9.7 h (~48 min each), 2.0 GiB. Sub-13…32 live in `serialised_competition` (first halves): not prepared yet.
 - `kaggle/xsub/xsub.py`: train sub-0 (Sherlock2–7), zero-shot test on sub-5…12 (val sub-1…4), retrieval over
   50/250/1000 words + unseen word types, permuted-label control. Launched.
+
+## 2026-11-19 — cross-subject results and a timing confound
+- Zero-shot on 8 unseen subjects: MEG sentence-context model 61 % (50 words), but the 7 s-shift control keeps 55 %.
+- Timing-only model (no MEG) reaches 75.8 % / 43.6 % (50 / 250 words): transcript rhythm alone beats the MEG models.
+- Honest brain-only (one word at a time): 26.8 % / 6.2 % (chance 20 / 4), controls at chance. See `reports/phase2.md`.
+- Kaggle GPU used so far: ~3 h (probes 0.3, xsub runs 0.3 + 1.1 + 1.1). Container restarted 3 times; Kaggle jobs unaffected.
+- Next: novelty check of the timing finding; gap-only timing ablation; test the confound on MEG-XL's own pipeline.
