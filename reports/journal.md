@@ -39,3 +39,15 @@
 - Novelty check: the timing confound was published by Oxford on 2026-09-30 (arXiv 2609.40359, SimpleB2T). STOP on that
   claim (rule 1). What is left open, to our knowledge: timing-free decoding on never-seen subjects with <= 10 min of
   calibration (our single-word baseline: 26.8 % @50 zero-shot vs 38-44 % in-subject), and imagined speech (Maryland data).
+
+## 2026-11-19 06:45 UTC — autonomous night plan (Joaquim asleep, asked to keep running)
+Running on Kaggle: `innervoice-xsub` v4 (calibration study: bn / input / full at 1, 5, 10 min; + multi-subject
+training; 3 seeds; ~2.5 h GPU) and `innervoice-xsub-agg` v1 (zero-shot + repeated-observation aggregation, 3 seeds; ~45 min).
+Queue, in order, each step only after the previous results are read and saved under `results/`:
+1. Save both results, write `reports/phase3.md` (calibration gains with SD over subjects, aggregation curves).
+2. If any calibration method gives a positive gain on test subjects: rerun it with aggregation metrics.
+   If none does: test output-side calibration (per-subject centring / ridge map on embeddings) from saved embeddings.
+3. Prepare sub-13…32 (`serialised_competition`) with the prep job (CPU) and re-evaluate zero-shot on 28 test subjects.
+4. Novelty check before any claim (include searches for critiques/controls). Never announce, only report.
+Limits: <= 6 h GPU in a row without a report entry; keep 5 h weekly reserve; nothing paid; nothing sent outside.
+Kaggle credentials come from the session proxy: export KAGGLE_USERNAME=joaquimmanjijung and any dummy KAGGLE_KEY.
