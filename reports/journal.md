@@ -94,3 +94,8 @@ sub-13…32 are prepared).
 - Running: `innervoice-xsub-align` v2 (controls: random pairing, covariance-only) and `innervoice-xsub-weak`
   (600-step decoder, 10 min: ridge vs random pairing vs Procrustes vs supervised) to test whether decoder strength
   explains the public null. Commit 04897c5 + override fix.
+
+## 2026-11-19 13:40 UTC — alignment controls pass
+- Random pairing: −4.2 / −3.7 / −2.1 vs zero-shot; covariance-only: ~0. Alignment beats both, 8/8 subjects at every K.
+- The gain needs stimulus-locked correspondence between brains. Still running: weak-decoder replication of the public null + Procrustes.
+- Kaggle GPU used so far: ~14.3 h.

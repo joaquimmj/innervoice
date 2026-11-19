@@ -54,9 +54,23 @@ the mapped recording B. Sub-0's Sherlock1 MEG is never used for training. Zero-s
 
 Paired difference alignment − supervised at 50 words: +1.58 [+0.41, +2.87] at 5 min, −0.08 at 10 min, +0.58 at
 20 min (n.s.). Alignment + fine-tune − supervised at 20 min: +1.60 [+0.72, +2.57] (50 w), +0.60 [+0.22, +1.06] (250 w).
-**Not yet a claim:** the controls that separate stimulus correspondence from a generic sensor re-mapping
-(random pairing; covariance matching only) are running (v8). Alignment also requires the new subject to listen to
-the same audio as the training subject; it removes the need to train the decoder, not the need for a known stimulus.
+**Controls (`results/phase3_alignment_v2`, commit f6d9558; same 3 decoders, same subjects):**
+
+| 50 words, gain vs zero-shot | 5 min | 10 min | 20 min |
+|---|---|---|---|
+| alignment (stimulus-paired windows) | +3.59 [+1.67, +5.60] 7/8 | +4.32 [+2.19, +6.76] 7/8 | +5.94 [+3.83, +8.13] 8/8 |
+| same map, **random pairing** within the shared book | −4.15 [−5.59, −2.80] 0/8 | −3.73 [−5.61, −1.97] 1/8 | −2.07 [−3.40, −0.92] 1/8 |
+| **covariance matching only** (CORAL, no pairing) | −0.47 [−1.54, +0.70] 3/8 | −0.13 [−1.11, +0.79] 3/8 | +0.18 [−0.78, +1.17] 4/8 |
+| alignment − random pairing (paired) | +7.74 [+6.04, +9.53] 8/8 | +8.06 [+6.01, +10.82] 8/8 | +8.02 [+6.73, +9.85] 8/8 |
+| alignment − covariance only (paired) | +4.06 [+2.45, +5.90] 8/8 | +4.46 [+2.14, +7.06] 8/8 | +5.76 [+3.65, +8.21] 8/8 |
+
+At 250 words: alignment − random pairing +1.75 / +2.36 / +2.54 (8/8 each); alignment − covariance only
++0.56 [−0.05, +1.21] / +0.94 [+0.32, +1.56] / +1.51 [+0.79, +2.22].
+**The gain requires stimulus-locked correspondence between the two brains**: destroying the pairing makes the map
+harmful, and matching second-order sensor statistics alone gives nothing. Alignment needs the new subject to listen
+to the same audio as the training subject; it removes the need to train the decoder, not the need for a known
+stimulus. Novelty: the method is published for fMRI (Ferrante et al. 2023/24) and was a public null on LibriBrain
+with a weaker decoder (rohit-ravi2, P1b); a weak-decoder replication and Procrustes comparison are running.
 
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
