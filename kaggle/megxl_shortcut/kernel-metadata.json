@@ -1,0 +1,15 @@
+{
+  "id": "{KAGGLE_USERNAME}/innervoice-megxl-shortcut",
+  "title": "innervoice-megxl-shortcut",
+  "code_file": "megxl_shortcut.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "joaquimmanjijung/innervoice-libribrain-prep"
+  ]
+}

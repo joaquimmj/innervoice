@@ -73,3 +73,18 @@ rohit-ravi2/libribrain-2026 PREDICTIONS/REPORT/RUNS; others snippet only (marked
 Verdict: method PARTIALLY published (fMRI/ECoG; MEG null in a repo). A positive, controlled MEG result + explanation of
 the null would be a modest contribution. Required before any claim: mis-paired control (running, v8), covariance-only
 control (running), Procrustes/CCA/SRM comparisons, alignment on a weaker decoder (to explain P1b), a multi-subject template.
+
+## 2026-11-19 — check: does MEG-XL's own word decoder use the overlapping-window timing shortcut? → not tested anywhere found
+Read in full (pdftotext): arXiv 2609.40359 (shortcut paper), 2609.03231 (PNPL 2026), 2608.25204 (LibriBrain100, sections
+4.2–4.3, B.7). Read code: MEG-XL @97da041 (dataset grouping, training step, noise baseline). Searched: web (2 extended,
+1 standard queries), rohit-ravi2/libribrain-2026 (grep shortcut/overlap/synthetic/MEG-XL).
+- 2609.40359 tests the d'Ascoli decoder only (joint vs isolated, shared vs independent synthetic, timing-only), incl. 32
+  LibriBrain100 subjects; MEG-XL appears only in its references.
+- MEG-XL's inputs are 50 concatenated 3 s windows of consecutive words (overlapping in real time) with an encoder
+  attending across all of them: the same structure. Its built-in noise baseline (commit 8a542ef) draws independent
+  noise per input, i.e. the "isolated synthetic" condition, which cannot reveal the shortcut.
+- Broad-track reference (2609.03231 Table 1): MEG-XL 42.96 % BAcc@10, competition vocab, new subjects fine-tuned on half of
+  Sherlock1 ses-11. LibriBrain100 Fig. 3–4: MEG-XL on subjects 1–32, values in figures (not read: to verify).
+- rohit-ravi2: timing twins of their own decoder, no MEG-XL shortcut test found.
+Verdict: untested to our knowledge. Test: shared-synthetic vs real MEG × adjacent vs shuffled-non-overlapping grouping,
+inside MEG-XL's own code (kaggle/megxl_shortcut). Not searched: bioRxiv, OpenReview, Scholar, Kaggle discussions.
