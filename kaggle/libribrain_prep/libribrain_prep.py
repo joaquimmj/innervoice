@@ -14,6 +14,7 @@ MEGXL_COMMIT = "97da04171d22e8fe4822cfeb3047a57ecf86b318"
 REPO = "pnpl/LibriBrain"
 SUBJECT_RE = r"sub-0"  # regex on the subject part of the file name
 TASKS = None  # None = every task; else a list like ["Sherlock1"]
+SERIALISED_DIR = "serialised"  # "serialised_competition" holds the first halves released for sub-13…32
 SENSOR_REPO = "pnpl/LibriBrain"  # raw FIF used for sensor geometry (same scanner for all subjects)
 L_FREQ, H_FREQ, SFREQ = 0.1, 40.0, 50.0
 LIMIT = int(os.environ.get("PREP_LIMIT", "0"))  # >0: only the first N recordings (smoke test)
@@ -38,7 +39,7 @@ mne.set_log_level("ERROR")
 root, cache = f"{W}/LibriBrain", f"{W}/cache"
 os.makedirs(cache, exist_ok=True)
 files = [f.path for f in HfApi().list_repo_tree(REPO, repo_type="dataset", recursive=True)]
-h5s = sorted(p for p in files if p.endswith(".h5") and "/serialised/" in p and re.search(rf"/({SUBJECT_RE})_", p)
+h5s = sorted(p for p in files if p.endswith(".h5") and f"/{SERIALISED_DIR}/" in p and re.search(rf"/({SUBJECT_RE})_", p)
              and (TASKS is None or p.split("/")[0] in TASKS))
 if LIMIT:
     h5s = h5s[:LIMIT]
