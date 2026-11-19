@@ -24,13 +24,18 @@ import h5py, numpy as np, torch, torch.nn as nn, torch.nn.functional as F
 # "multiN": single-word model trained on sub-0 plus recording A of the first N subjects of POOL (half of each batch).
 # Test subjects and their text (recording B) are never in training. v3/v4 results: results/phase3_*.
 # v6: calibration curve on the sub-0-only timing-free model (v4 found +4.4 points at 50 words with 10 min).
+# v7: label-free functional alignment. The new subject and sub-0 heard the same audio (ALIGN_TASK); a 306x306 ridge
+# map from the new subject's MEG to sub-0's MEG is fitted on the first K minutes of recording A (no word labels,
+# only the shared stimulus timeline), then the sub-0 decoder is applied to the mapped MEG of recording B.
 RUNS = [(0, "multi0"), (1, "multi0"), (2, "multi0")]
 CAL_MINUTES = [5, 10, 20]
 # (method, steps, lr). zero: no adaptation. bn: BatchNorm statistics re-estimated on the calibration MEG (no labels).
 # input: bn + a 306x306 input mixing matrix (init identity) fitted on labelled calibration words. full: bn + all weights.
 # fullshuf: same as full but calibration labels are permuted (control: any gain must come from brain-label pairing).
-CAL_GRID = [("full", 30, 1e-4), ("full", 100, 1e-4), ("full", 300, 3e-5), ("fullshuf", 100, 1e-4)]
+# align: lr field = ridge strength relative to the mean input variance. alignfull: align (0.1) then fine-tune all weights.
+CAL_GRID = [("align", 0, 0.01), ("align", 0, 0.1), ("align", 0, 1.0), ("alignfull", 100, 1e-4), ("full", 100, 1e-4), ("fullshuf", 100, 1e-4)]
 TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", "Sherlock7"]  # sub-0, != test book
+ALIGN_TASK = "Sherlock1"  # book heard by every subject including sub-0: shared stimulus for functional alignment
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
 VAL_SUBJECTS = [19, 20, 21, 22]  # model selection (epoch, prior temperature); never trained on, never reported
 TEST_SUBJECTS = [5, 6, 7, 8, 9, 10, 11, 12]  # never trained on; all reported numbers
@@ -50,7 +55,7 @@ if SMOKE:
     RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing")], [1]
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
-    CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4)]
+    CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -63,7 +68,7 @@ def load_recordings():
     for cache in sorted(glob.glob(f"{INPUT}/**/cache/*.h5", recursive=True)):
         m = re.match(r"sub-(\d+)_(ses-\d+)_task-(\w+?)_(run-\d+)_preproc", os.path.basename(cache))
         sub, ses, task, run = int(m.group(1)), m.group(2), m.group(3), m.group(4)
-        if sub == 0 and task not in TRAIN_TASKS:
+        if sub == 0 and task not in TRAIN_TASKS + [ALIGN_TASK]:
             continue
         ev = glob.glob(f"{os.path.dirname(os.path.dirname(cache))}/*/serialized/{task}/derivatives/events/sub-{sub}_{ses}_task-{task}_{run}_events.tsv")
         if not ev:
@@ -83,12 +88,15 @@ def load_recordings():
                 continue
             words.append((w, s, int(float(r["sentenceidx"] or -1)), float(r["duration"] or 0)))
         if words:
-            recs.append(dict(sub=sub, name=os.path.basename(cache), x=torch.from_numpy(x).half(), words=words))
+            recs.append(dict(sub=sub, task=task, name=os.path.basename(cache), x=torch.from_numpy(x).half(), words=words))
     return recs
 
 
 recs = load_recordings()
 assert recs, f"no recordings under {INPUT}"
+# sub-0 recordings of the test book: never trained on; used only as the target of label-free functional alignment
+align_recs = [r for r in recs if r["sub"] == 0 and r["task"] == ALIGN_TASK and ALIGN_TASK not in TRAIN_TASKS]
+recs = [r for r in recs if r not in align_recs]
 _held = set(sorted(r["name"] for r in recs if r["sub"] == 0)[-N_HELDOUT_SUB0:])
 is_heldout = lambda r: r["name"] in _held
 train_recs = [r for r in recs if r["sub"] == 0 and not is_heldout(r)]
@@ -105,7 +113,7 @@ all_types = vocab + test_types
 tid = {w: i for i, w in enumerate(all_types)}
 n_train_types = len(vocab)
 log_prior = torch.log(torch.tensor([train_counts[w] for w in vocab], dtype=torch.float) / sum(train_counts.values()))
-print(f"recordings train={len(train_recs)} eval_groups={ {k: len(v) for k, v in eval_groups.items()} } "
+print(f"align_recs={len(align_recs)} recordings train={len(train_recs)} eval_groups={ {k: len(v) for k, v in eval_groups.items()} } "
       f"train_words={sum(train_counts.values())} train_types={n_train_types} unseen_types={len(test_types)}", flush=True)
 
 
@@ -296,10 +304,46 @@ def ngram_overlap(a, b, n=5):
     return len(ga & gb) / max(1, len(gb))
 
 
+NGRAM = 6
+align_index = {}
+for _r in align_recs:  # unique word n-grams of sub-0's recordings of the shared book -> (recording, word index)
+    _w = [w for w, *_ in _r["words"]]
+    for _j in range(len(_w) - NGRAM + 1):
+        _k = tuple(_w[_j:_j + NGRAM])
+        align_index[_k] = None if _k in align_index else (_r, _j)
+
+
+def fit_alignment(cal, lam):
+    """Ridge map W (306x306) with W @ x_new ~ x_sub0 on word-locked windows of the same audio. No word labels used:
+    words only provide the common timeline of the stimulus. Returns (W, n_pairs, median onset-interval mismatch in s)."""
+    new, ref, dt = [], [], []
+    for r, (i,) in cal:
+        hit = align_index.get(tuple(w for w, *_ in r["words"][i:i + NGRAM]))
+        if hit:
+            new.append((r, [i])); ref.append((hit[0], [hit[1]]))
+            if i + 1 < len(r["words"]) and hit[1] + 1 < len(hit[0]["words"]):
+                dt.append(abs((r["words"][i + 1][1] - r["words"][i][1]) - (hit[0]["words"][hit[1] + 1][1] - hit[0]["words"][hit[1]][1])) / FS)
+    if len(new) < 50:
+        return None, len(new), None
+    cxx, cyx = torch.zeros(306, 306, device=dev, dtype=torch.float64), torch.zeros(306, 306, device=dev, dtype=torch.float64)
+    for b in range(0, len(new), 256):
+        xn, x0 = batch(new[b:b + 256])[0].double(), batch(ref[b:b + 256])[0].double()
+        cxx += torch.einsum("bit,bjt->ij", xn, xn); cyx += torch.einsum("bit,bjt->ij", x0, xn)
+    reg = lam * cxx.diagonal().mean() * torch.eye(306, device=dev, dtype=torch.float64)
+    return (cyx @ torch.linalg.inv(cxx + reg)).float(), len(new), float(np.median(dt)) if dt else None
+
+
 def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model = Decoder(use_pos=False).to(dev)
     model.load_state_dict(state)
     model.eval()
+    info = {}
+    if method.startswith("align"):
+        W, n_pairs, dt = fit_alignment(cal, lr if method == "align" else 0.1)
+        if W is None:
+            return None
+        model.A = nn.Parameter(W, requires_grad=False)
+        info = dict(n_aligned_words=n_pairs, onset_interval_mismatch_s=dt)
     if method != "zero":
         for m in model.modules():
             if isinstance(m, nn.BatchNorm1d):
@@ -313,6 +357,8 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
         if method == "input":
             model.requires_grad_(False)
             model.A = nn.Parameter(torch.eye(306, device=dev))
+        if method == "alignfull":
+            model.A.requires_grad_(True)
         opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0)
         r = np.random.default_rng(seed)
         for _ in range(steps):  # eval mode: fixed BatchNorm statistics, no dropout
@@ -326,6 +372,7 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     sc = score(*embed(model, None, None, segs=ev), tau, torch.Generator(device=dev).manual_seed(seed))
     out = {k: v["bal_top10"] for k, v in sc.items() if isinstance(v, dict)}
     out.update({f"{k}_top1": v["bal_top1"] for k, v in sc.items() if isinstance(v, dict) and k.startswith("agg")})
+    out.update(info)
     return out
 
 
@@ -339,7 +386,9 @@ def calibration_study(state, tau, seed, grid):
             if len(cal) < 8:
                 continue
             for method, steps, lr in grid:
-                row[f"{method}_s{steps}_k{minutes}"] = dict(adapt_and_score(state, cal, ev, method, steps, lr, tau, seed), n_cal_words=len(cal))
+                res = adapt_and_score(state, cal, ev, method, steps, lr, tau, seed)
+                if res is not None:
+                    row[f"{method}_s{steps}_lr{lr}_k{minutes}"] = dict(res, n_cal_words=len(cal))
         table[k] = row
         print("calib", seed, k, {a: (round(b.get(f"top{RETRIEVAL_SIZES[0]}", 0), 3) if isinstance(b, dict) else round(b, 3)) for a, b in row.items()}, flush=True)
     # per (method, K): hyper-parameters chosen on validation subjects, reported on test subjects
@@ -349,7 +398,7 @@ def calibration_study(state, tau, seed, grid):
     summary = {"zero": {n: dict(mean=mean(cal_test, "zero", n), sd=float(np.std([table[k]["zero"][n] for k in cal_test]))) for n in (n0, n1)}}
     for minutes in CAL_MINUTES:
         for method in sorted({g[0] for g in grid}):
-            names = [f"{m}_s{st}_k{minutes}" for m, st, _ in grid if m == method]
+            names = [f"{m}_s{st}_lr{lr}_k{minutes}" for m, st, lr in grid if m == method]
             best_name = max(names, key=lambda nm: -1 if np.isnan(mean(val_keys, nm, n0)) else mean(val_keys, nm, n0))
             vals = {n: [table[k][best_name][n] - table[k]["zero"][n] for k in cal_test if best_name in table[k]] for n in (n0, n1)}
             summary[f"{method}_k{minutes}"] = dict(chosen=best_name, **{n: dict(mean=mean(cal_test, best_name, n),

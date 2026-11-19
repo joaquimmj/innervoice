@@ -29,9 +29,10 @@ def test_xsub_smoke(tmp_path):
     patterns = {w: rng.normal(0, 1, 306).astype(np.float32) for w in types + ["newword1", "newword2"]}
     for run in range(1, 5):
         make_recording(tmp_path / "a", 0, "Sherlock2", run, list(rng.choice(types, 120)), patterns, rng)
-    for sub in (1, 5):
+    shared = [list(rng.choice(types + ["newword1", "newword2"], 150)) for _ in (1, 2)]  # same "book" for everyone
+    for sub in (0, 1, 5):
         for run in (1, 2):
-            make_recording(tmp_path / "b", sub, "Sherlock1", run, list(rng.choice(types + ["newword1", "newword2"], 150)), patterns, rng)
+            make_recording(tmp_path / "b", sub, "Sherlock1", run, shared[run - 1], patterns, rng)
     env = dict(os.environ, XSUB_INPUT=str(tmp_path), XSUB_OUT=str(tmp_path), XSUB_SMOKE="1", CUDA_VISIBLE_DEVICES="")
     r = subprocess.run([sys.executable, str(ROOT / "kaggle" / "xsub" / "xsub.py")], env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-3000:]
@@ -45,7 +46,9 @@ def test_xsub_smoke(tmp_path):
         agg = r["per_subject"]["sub5"]
         assert agg["agg2"]["n_groups"] <= agg["agg1"]["n_groups"] // 2 + 12 and 0 <= agg["agg2"]["bal_top1"] <= 1
     cal = res["runs"][1]["calibration"]
-    assert set(cal["summary_test_subjects"]) == {"zero", "bn_k1", "input_k1", "full_k1"}
-    assert "input_s3_k1" in cal["per_subject"]["sub5"] and cal["per_subject"]["sub5"]["text_overlap_5gram"] < 0.5
+    assert set(cal["summary_test_subjects"]) == {"zero", "bn_k1", "input_k1", "full_k1", "align_k1", "alignfull_k1"}
+    al = cal["per_subject"]["sub5"]["align_s0_lr0.1_k1"]
+    assert al["n_aligned_words"] >= 50 and al["onset_interval_mismatch_s"] == 0
+    assert "input_s3_lr0.001_k1" in cal["per_subject"]["sub5"] and cal["per_subject"]["sub5"]["text_overlap_5gram"] < 0.5
     assert set(res["runs"][2]["calibration"]["summary_test_subjects"]) == {"zero", "bn_k1"}
     assert (tmp_path / "model_seed0_single.pt").exists() and (tmp_path / "eval_embeddings_seed0_sentence.pt").exists()
