@@ -67,3 +67,13 @@ sub-13…32 are prepared).
 - More training subjects: no reliable gain on disjoint text; the A+B improvement was stimulus sharing (caught before reporting).
 - Launched v6: calibration curve 5/10/20 min, steps 30/100/300, shuffled-label control, aggregation on calibrated models.
 - Kaggle GPU used so far: ~9.5 h (v4 2.5 h, scale 1.9 h, agg 0.5 h, earlier ~4.6 h).
+
+## 2026-11-19 11:05 UTC — functional alignment launched
+- Novelty check of the calibration result logged (PARTIALLY published; see novelty_log).
+- v6 (calibration curve 5/10/20 min + shuffled-label control) still running on `innervoice-xsub` since 09:08.
+- New idea, launched as `innervoice-xsub-align` (commit 89b72fe): label-free functional alignment. Every subject heard
+  the same book as sub-0 (Sherlock1), so a 306x306 ridge map new-subject MEG → sub-0 MEG is fitted on the first K
+  minutes of the shared audio and the sub-0 decoder is applied to the mapped signal. Compared in the same run with
+  supervised fine-tuning, align + fine-tune, and the shuffled-label control. Sub-0's Sherlock1 MEG is never trained on.
+- To do when both finish: save under results/phase3_calibration_v2 and results/phase3_alignment_v1, paired gains
+  with bootstrap CIs, update phase3.md; novelty check of functional alignment for MEG word decoding before any claim.
