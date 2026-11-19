@@ -72,6 +72,23 @@ to the same audio as the training subject; it removes the need to train the deco
 stimulus. Novelty: the method is published for fMRI (Ferrante et al. 2023/24) and was a public null on LibriBrain
 with a weaker decoder (rohit-ravi2, P1b); a weak-decoder replication and Procrustes comparison are running.
 
+### 1d. Weaker decoder and orthogonal Procrustes (`results/phase3_weak_v1`, commit d83a868)
+Decoder trained 10× shorter (600 steps; held-out sub-0 36–37 % vs 41–48 % for the full decoder), 10 min, 8 subjects, 3 seeds.
+
+| 10 min, gain vs zero-shot (27.0 % / 6.7 %) | 50 words | 250 words |
+|---|---|---|
+| ridge alignment | +4.46 [+2.69, +6.41] 8/8 | +0.88 [+0.51, +1.19] 7/8 |
+| random pairing (control) | −3.50 [−4.90, −1.87] 1/8 | −1.80 [−2.24, −1.30] 0/8 |
+| orthogonal Procrustes (same pairs) | +0.10 [−1.64, +1.94] 4/8 | −0.09 [−0.58, +0.44] 2/8 |
+| supervised fine-tune | +1.76 [+0.17, +3.47] 6/8 | +1.14 [+0.55, +1.70] 7/8 |
+
+- **Hypothesis rejected:** a weaker decoder does not make alignment fail, so decoder strength does not explain the
+  public LibriBrain null (rohit-ravi2 P1b). Remaining differences with their recipe (to test): their penalty
+  shrinks the map towards the identity (‖A − I‖²) instead of towards zero, other normalisation, other decoder.
+- With a weak decoder, alignment beats supervised fine-tuning at 50 words (+2.69 [+0.66, +4.80]), not at 250 words.
+- An orthogonal map gives nothing: the useful map is not a rotation of the sensor space but a regression that also
+  re-weights and denoises.
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.

@@ -11,3 +11,4 @@
 | phase3_calibration_v2 | 3 | Calibration curve, fine-tune 100 steps, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +2.04 / +4.45 / +5.41 pts @50; shuffled labels: −5.87 (chance) | commit 82c714e |
 | phase3_alignment_v1 | 3 | Label-free ridge alignment to sub-0 on shared audio, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +3.59 / +4.32 / +5.94 @50; align+fine-tune 20 min +6.96 (33.3 %) — controls pending | commit 89b72fe |
 | phase3_alignment_v2 | 3 | Alignment controls, 8 unseen subjects, 3 seeds, @50 | align − random pairing: +7.7 / +8.1 / +8.0 (5/10/20 min, 8/8); align − covariance-only: +4.1 / +4.5 / +5.8 (8/8) | commit f6d9558 |
+| phase3_weak_v1 | 3 | Weak (600-step) decoder, 10 min, @50 | ridge align +4.46 (8/8); random pairing −3.50; Procrustes +0.10; supervised +1.76 | commit d83a868 |

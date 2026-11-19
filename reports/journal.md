@@ -99,3 +99,7 @@ sub-13…32 are prepared).
 - Random pairing: −4.2 / −3.7 / −2.1 vs zero-shot; covariance-only: ~0. Alignment beats both, 8/8 subjects at every K.
 - The gain needs stimulus-locked correspondence between brains. Still running: weak-decoder replication of the public null + Procrustes.
 - Kaggle GPU used so far: ~14.3 h.
+
+## 2026-11-19 14:00 UTC — weak decoder: alignment still works; Procrustes does not
+- Weak decoder: ridge alignment +4.5 at 50 words (8/8), so decoder strength does not explain the public null.
+- Procrustes +0.1 (n.s.). Next to test for the null: identity-shrinkage penalty as in rohit-ravi2 P1b.
