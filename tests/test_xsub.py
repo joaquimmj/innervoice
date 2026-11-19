@@ -42,6 +42,8 @@ def test_xsub_smoke(tmp_path):
         top = r["per_subject"]["sub5"]["top5"]
         assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0
         assert set(r["controls_test_subjects"]) == {"shift", "jitter", "noise"}
+        agg = r["per_subject"]["sub5"]
+        assert agg["agg2"]["n_groups"] <= agg["agg1"]["n_groups"] // 2 + 12 and 0 <= agg["agg2"]["bal_top1"] <= 1
     cal = res["runs"][1]["calibration"]
     assert set(cal["summary_test_subjects"]) == {"zero", "bn_k1", "input_k1", "full_k1"}
     assert "input_s3_k1" in cal["per_subject"]["sub5"] and cal["per_subject"]["sub5"]["text_overlap_5gram"] < 0.5

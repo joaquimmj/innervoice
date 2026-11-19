@@ -34,6 +34,7 @@ LR, WD, N_NEG = 1e-3, 0.05, 4096
 PRE, POST, FS = 1.0, 2.0, 50
 D_CONV, D_EMB, DROPOUT = 128, 256, 0.3
 RETRIEVAL_SIZES = [50, 250, 1000]
+AGG_VOCAB, AGG_NS = 250, [1, 2, 5, 10]
 
 INPUT = os.environ.get("XSUB_INPUT", "/kaggle/input")
 OUT = os.environ.get("XSUB_OUT", "/kaggle/working" if os.path.isdir("/kaggle/working") else ".")
@@ -41,6 +42,7 @@ SMOKE = os.environ.get("XSUB_SMOKE") == "1"  # tiny CPU run on synthetic data (t
 if SMOKE:
     STEPS, EVAL_EVERY, BATCH_SEGS, N_NEG, RETRIEVAL_SIZES = 30, 15, 8, 16, [5, 10]
     RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "single_multi"), (0, "timing")], [1]
+    AGG_VOCAB, AGG_NS = 10, [1, 2]
     CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
@@ -235,6 +237,30 @@ def score(z, y, tau, gen):
         out[f"top{n}"] = dict(bal_top10=balanced_topk(s, yy, 10), bal_top1=balanced_topk(s, yy, 1), chance_top10=min(1.0, 10 / n),
                               median_rank=float(rank.median()), n=int(keep.sum()),
                               permuted_bal_top10=balanced_topk(s, yy[torch.randperm(len(yy), generator=gen, device=yy.device)], 10))
+    # Repeated observations (after SimpleB2T, arXiv 2609.40359): average the embeddings of n distinct occurrences of
+    # the same word, then retrieve among the AGG_VOCAB most frequent training words. Groups are disjoint.
+    keep = y < AGG_VOCAB
+    if keep.sum() >= 20:
+        zz, yy = z[keep].float(), y[keep]
+        perm = torch.randperm(len(yy), generator=gen, device=yy.device)
+        zz, yy = zz[perm], yy[perm]
+        order = torch.argsort(yy, stable=True)
+        zz, yy = zz[order], yy[order]
+        start = torch.searchsorted(yy, yy)  # index of the first occurrence of each word
+        within = torch.arange(len(yy), device=yy.device) - start
+        for n in AGG_NS:
+            grp = within // n
+            full = (torch.bincount(yy, minlength=AGG_VOCAB)[yy] // n) > grp  # drop incomplete groups
+            if full.sum() < n * 10:
+                continue
+            gid = (yy * 100000 + grp)[full]
+            uniq, inv = torch.unique(gid, return_inverse=True)
+            zm = torch.zeros(len(uniq), zz.shape[1], device=zz.device).index_add_(0, inv, zz[full]) / n
+            ym = uniq // 100000
+            sc = scale * zm @ E[:AGG_VOCAB].T - tau * log_prior[:AGG_VOCAB].to(dev)
+            out[f"agg{n}"] = dict(bal_top10=balanced_topk(sc, ym, 10), bal_top1=balanced_topk(sc, ym, 1),
+                                  top1=float((sc.argmax(1) == ym).float().mean()), n_groups=int(len(ym)),
+                                  n_word_types=int(len(torch.unique(ym))), vocab=AGG_VOCAB)
     keep = y >= n_train_types  # word types never present in the training text
     if keep.sum() >= 20:
         s, yy = z[keep] @ E[n_train_types:].T, y[keep] - n_train_types
@@ -290,7 +316,9 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
                                    torch.searchsorted(cand, y))
             opt.zero_grad(set_to_none=True); loss.backward(); opt.step()
     sc = score(*embed(model, None, None, segs=ev), tau, torch.Generator(device=dev).manual_seed(seed))
-    return {k: v["bal_top10"] for k, v in sc.items() if isinstance(v, dict)}
+    out = {k: v["bal_top10"] for k, v in sc.items() if isinstance(v, dict)}
+    out.update({f"{k}_top1": v["bal_top1"] for k, v in sc.items() if isinstance(v, dict) and k.startswith("agg")})
+    return out
 
 
 def calibration_study(state, tau, seed, grid):
@@ -384,6 +412,8 @@ def run(seed, mode):
         out = {f"top{n}": {m: mean_over(table, f"top{n}", m) for m in ("bal_top10", "bal_top1", "permuted_bal_top10")}
                for n in RETRIEVAL_SIZES}
         out["unseen_words"] = {m: mean_over(table, "unseen_words", m) for m in ("bal_top10", "top10", "median_rank")}
+        for n in AGG_NS:
+            out[f"agg{n}"] = {m: mean_over(table, f"agg{n}", m) for m in ("bal_top1", "bal_top10", "top1", "n_word_types")}
         return out
 
     tag = f"seed{seed}_{mode}"
