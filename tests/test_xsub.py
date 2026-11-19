@@ -36,6 +36,9 @@ def test_xsub_smoke(tmp_path):
     assert r.returncode == 0, r.stderr[-3000:]
     res = json.loads((tmp_path / "xsub_result.json").read_text())
     assert res["test_subjects"] == ["sub5"] and res["data"]["unseen_types"] == 2
-    top = res["per_subject"]["sub5"]["top5"]
-    assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0
-    assert (tmp_path / "model.pt").exists() and (tmp_path / "eval_embeddings.pt").exists()
+    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "chunk")]
+    for r in res["runs"]:
+        top = r["per_subject"]["sub5"]["top5"]
+        assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0
+        assert set(r["controls_test_subjects"]) == {"shift", "noise"}
+    assert (tmp_path / "model_seed0_chunk.pt").exists() and (tmp_path / "eval_embeddings_seed0_sentence.pt").exists()
