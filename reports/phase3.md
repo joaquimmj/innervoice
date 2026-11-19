@@ -137,6 +137,20 @@ types). Same 8 test subjects, 3 seeds.
 - **Seed ensemble: no zero-shot gain** (+0.27 [−0.80, +1.21]). Its aligned numbers in this run are invalid: the
   ensemble skipped the BatchNorm re-estimation that the single-model alignment does (bug, fixed after this run).
 
+### 1h. Embedding-level refinement of the map (`results/phase3_emb_v1`, commit 2360161) — negative
+Input map initialised by ridge, then trained (decoder frozen, no labels) so the new subject's embeddings match the
+frozen decoder's embeddings of sub-0 at the same moments. 8 test subjects, 3 seeds, 50 words, paired vs ridge:
+
+| setting | 5 min | 10 min | 20 min |
+|---|---|---|---|
+| ridge (abs) | 30.0 | 30.7 | 32.3 |
+| refine 100 steps, lr 1e-4 − ridge | −0.3 | +0.45 [−0.62, +1.69] | +0.0 |
+| refine 100 steps, lr 1e-3 − ridge | −0.62 [−1.67, +0.40] | −0.37 [−1.44, +0.73] | −1.72 [−2.74, −0.80] |
+| refine 300 steps, lr 1e-3 − ridge | −0.8 | −1.35 [−2.64, −0.17] | −1.3 |
+
+- The smallest step size stays near ridge; larger steps make it worse. Ridge on raw sensors remains the best map.
+- Ensemble lines in this run predate the BatchNorm fix and are not used.
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.

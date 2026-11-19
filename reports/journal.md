@@ -124,3 +124,7 @@ sub-13…32 are prepared).
 - ~78 h sub-0: zero-shot 28.5 % (+2), align 20 min 33.2 % (+0.9); retrieval set not identical to earlier runs.
 - Ensemble: no zero-shot gain; aligned ensemble numbers invalid (missing BatchNorm re-estimation) — fixed in code.
 - Kaggle GPU used so far: ~19.5 h (estimate). Embedding-alignment run still in progress.
+
+## 2026-11-19 17:45 UTC — embedding-level map refinement: negative
+- Refining the ridge map toward sub-0's decoder embeddings does not help (+0.45 n.s. at best, −1.7 at 20 min with
+  larger steps). Ridge on raw sensors stays the method. Saved in results/phase3_emb_v1.
