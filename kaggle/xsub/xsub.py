@@ -58,7 +58,7 @@ if SMOKE:
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
     CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4),
-                ("alignshuf", 0, 0.1), ("coral", 0, 0.1)]
+                ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("procrustes", 0, 0.1)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -341,6 +341,9 @@ def fit_alignment(cal, lam, mode="align"):
         xn, x0 = batch(new[b:b + 256])[0].double(), batch(ref[b:b + 256])[0].double()
         cxx += torch.einsum("bit,bjt->ij", xn, xn); cyx += torch.einsum("bit,bjt->ij", x0, xn)
     reg = lam * cxx.diagonal().mean() * torch.eye(306, device=dev, dtype=torch.float64)
+    if mode == "procrustes":  # orthogonal map (rotation/reflection), fitted on the same paired windows
+        u, _, vh = torch.linalg.svd(cyx)
+        return (u @ vh).float(), len(new), float(np.median(dt)) if dt else None
     if mode == "coral":
         c00 = torch.zeros_like(cxx)
         for b in range(0, len(ref), 256):
@@ -356,7 +359,7 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model.load_state_dict(state)
     model.eval()
     info = {}
-    if method.startswith("align") or method == "coral":
+    if method.startswith("align") or method in ("coral", "procrustes"):
         W, n_pairs, dt = fit_alignment(cal, lr if method != "alignfull" else 0.1, "align" if method == "alignfull" else method)
         if W is None:
             return None
