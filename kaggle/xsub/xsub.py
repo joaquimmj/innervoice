@@ -366,6 +366,18 @@ def fit_alignment(cal, lam, mode="align"):
     return (cyx @ torch.linalg.inv(cxx + reg)).float(), len(new), float(np.median(dt)) if dt else None
 
 
+@torch.no_grad()
+def recalibrate_bn(model, cal):
+    """Re-estimate BatchNorm statistics on the calibration windows (through model.A if set). No labels."""
+    for m in model.modules():
+        if isinstance(m, nn.BatchNorm1d):
+            m.reset_running_stats(); m.momentum = None; m.train()  # cumulative average over the calibration set
+    for i in range(0, len(cal), 256):
+        x, _, gi, pad, tf = batch(cal[i:i + 256])
+        model(x, gi, pad, tf)
+    model.eval()
+
+
 def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model = Decoder(use_pos=False).to(dev)
     model.load_state_dict(state)
@@ -386,14 +398,7 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
         model.A = nn.Parameter(W, requires_grad=False)
         info = dict(n_aligned_words=n_pairs, onset_interval_mismatch_s=dt)
     if method != "zero":
-        for m in model.modules():
-            if isinstance(m, nn.BatchNorm1d):
-                m.reset_running_stats(); m.momentum = None; m.train()  # cumulative average over the calibration set
-        with torch.no_grad():
-            for i in range(0, len(cal), 256):
-                x, _, gi, pad, tf = batch(cal[i:i + 256])
-                model(x, gi, pad, tf)
-        model.eval()
+        recalibrate_bn(model, cal)
     if steps:
         if method == "input":
             model.requires_grad_(False)
@@ -562,10 +567,16 @@ def ensemble_study(tags, minutes_list):
     tau = float(np.mean([t for _, t in models]))
     gen = lambda: torch.Generator(device=dev).manual_seed(0)
 
-    def ens(ev, W=None):
+    states = [{k: v.clone() for k, v in m.state_dict().items()} for m, _ in models]
+
+    def ens(ev, W=None, cal=None):
         zs = []
-        for m, _ in models:
+        for (m, _), st in zip(models, states):
+            m.A = None
+            m.load_state_dict(st)  # original BatchNorm statistics
             m.A = None if W is None else nn.Parameter(W, requires_grad=False)
+            if W is not None:  # same procedure as the single-model "align" method
+                recalibrate_bn(m, cal)
             z, y = embed(m, None, None, segs=ev)
             zs.append(z.float())
         return F.normalize(torch.stack(zs).mean(0), dim=-1), y
@@ -583,7 +594,7 @@ def ensemble_study(tags, minutes_list):
             cal = [(ra, [i]) for i, w in enumerate(ra["words"]) if w[1] + WIN <= minutes * 60 * FS]
             W, n_pairs, _ = fit_alignment(cal, 0.1)
             if W is not None:
-                row[f"align_k{minutes}"] = {n: v["bal_top10"] for n, v in score(*ens(ev, W), tau, gen()).items() if isinstance(v, dict)}
+                row[f"align_k{minutes}"] = {n: v["bal_top10"] for n, v in score(*ens(ev, W, cal), tau, gen()).items() if isinstance(v, dict)}
         table[k] = row
         print("ensemble", k, {a: round(b.get(f"top{RETRIEVAL_SIZES[0]}", 0), 3) for a, b in row.items()}, flush=True)
     return dict(tags=tags, per_subject=table)

@@ -119,3 +119,8 @@ sub-13…32 are prepared).
   trained so the decoder's embeddings of the new subject match the frozen decoder's embeddings of sub-0 at the same
   moments of the shared audio). If positive, add a random-pairing control before reporting.
 - Paper draft started in drafts/paper/main.tex.
+
+## 2026-11-19 16:30 UTC — more data: small gain; ensemble bug fixed
+- ~78 h sub-0: zero-shot 28.5 % (+2), align 20 min 33.2 % (+0.9); retrieval set not identical to earlier runs.
+- Ensemble: no zero-shot gain; aligned ensemble numbers invalid (missing BatchNorm re-estimation) — fixed in code.
+- Kaggle GPU used so far: ~19.5 h (estimate). Embedding-alignment run still in progress.

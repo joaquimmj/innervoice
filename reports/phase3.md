@@ -119,6 +119,24 @@ At 250 words: alignment +1.04 (5 min) / +1.27 (10 min); supervised +1.22 / +2.09
 better than supervised fine-tuning with 5 minutes at 50 words, equal at 10 minutes; supervised is better at 250
 words with 10 minutes (−0.82 [−1.39, −0.27]).
 
+### 1g. More sub-0 training data (`results/phase3_data_v1`, commit 40b5dfc)
+Decoder trained on ~78 h of sub-0 (adds LibriBrain2 Sherlock8/9, TIMIT, MOCHA-TIMIT, TheMoth: 737 k words, 22 295
+types). Same 8 test subjects, 3 seeds.
+
+| 50 words | zero-shot | align 5 min | align 10 min | align 20 min | supervised 20 min |
+|---|---|---|---|---|---|
+| ~45 h (phase3_alignment_v2) | 26.4 | 30.0 | 30.7 | 32.3 | 31.8 |
+| **~78 h** | **28.5** | 30.6 | 31.4 | **33.2** | 31.5 |
+
+- Zero-shot improves by ~2 points and the final aligned score by ~1 point; the gain from alignment shrinks
+  (+4.7 at 20 min instead of +5.9). At 250 words zero-shot is slightly lower (5.9 vs 6.5).
+- **Caveat:** the retrieval set ("50 most frequent training words") changes when training text changes (TIMIT and
+  podcasts shift word frequencies), so the two rows are not on exactly the same word set.
+- Controls hold: alignment − random pairing +8.0 [+6.4, +9.7] at 10 min (8/8); alignment − supervised at 5 min
+  +1.95 [+0.46, +3.57] (7/8), as on 28 subjects.
+- **Seed ensemble: no zero-shot gain** (+0.27 [−0.80, +1.21]). Its aligned numbers in this run are invalid: the
+  ensemble skipped the BatchNorm re-estimation that the single-model alignment does (bug, fixed after this run).
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.
