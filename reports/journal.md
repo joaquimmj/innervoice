@@ -87,3 +87,10 @@ sub-13…32 are prepared).
 - Label-free alignment to sub-0 on shared audio: +3.6 / +4.3 / +5.9 points (5/10/20 min); align+fine-tune 20 min +7.0 → 33.3 %.
 - Launched v8 controls (`innervoice-xsub-align`, version 2): random pairing (alignshuf) and covariance-only (coral).
 - Kaggle GPU used so far: ~13.3 h.
+
+## 2026-11-19 13:00 UTC — alignment follow-ups
+- Novelty: ridge alignment to a reference subject is published for fMRI (Ferrante 2023/24) and was a public null on
+  LibriBrain (rohit-ravi2 P1b, weaker decoder). See novelty_log.
+- Running: `innervoice-xsub-align` v2 (controls: random pairing, covariance-only) and `innervoice-xsub-weak`
+  (600-step decoder, 10 min: ridge vs random pairing vs Procrustes vs supervised) to test whether decoder strength
+  explains the public null. Commit 04897c5 + override fix.
