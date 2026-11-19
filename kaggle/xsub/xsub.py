@@ -23,11 +23,13 @@ import h5py, numpy as np, torch, torch.nn as nn, torch.nn.functional as F
 # v5 scaling question: does timing-free transfer to unseen subjects improve with the number of training subjects?
 # "multiN": single-word model trained on sub-0 plus recording A of the first N subjects of POOL (half of each batch).
 # Test subjects and their text (recording B) are never in training. v3/v4 results: results/phase3_*.
-RUNS = [(sd, f"multi{n}") for n in (0, 4, 10, 20) for sd in (0, 1, 2)]
-CAL_MINUTES = [1, 5, 10]
+# v6: calibration curve on the sub-0-only timing-free model (v4 found +4.4 points at 50 words with 10 min).
+RUNS = [(0, "multi0"), (1, "multi0"), (2, "multi0")]
+CAL_MINUTES = [5, 10, 20]
 # (method, steps, lr). zero: no adaptation. bn: BatchNorm statistics re-estimated on the calibration MEG (no labels).
 # input: bn + a 306x306 input mixing matrix (init identity) fitted on labelled calibration words. full: bn + all weights.
-CAL_GRID = [("bn", 0, 0.0), ("input", 100, 1e-3), ("input", 300, 1e-3), ("full", 100, 1e-4), ("full", 300, 1e-4)]
+# fullshuf: same as full but calibration labels are permuted (control: any gain must come from brain-label pairing).
+CAL_GRID = [("full", 30, 1e-4), ("full", 100, 1e-4), ("full", 300, 3e-5), ("fullshuf", 100, 1e-4)]
 TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", "Sherlock7"]  # sub-0, != test book
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
 VAL_SUBJECTS = [19, 20, 21, 22]  # model selection (epoch, prior temperature); never trained on, never reported
@@ -315,6 +317,8 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
         r = np.random.default_rng(seed)
         for _ in range(steps):  # eval mode: fixed BatchNorm statistics, no dropout
             x, y, gi, pad, tf = batch([cal[i] for i in r.integers(0, len(cal), min(256, len(cal)))])
+            if method == "fullshuf":
+                y = y[torch.randperm(len(y), device=y.device)]
             cand = torch.unique(torch.cat([y, torch.multinomial(neg_p, min(N_NEG, n_train_types)).to(dev)]))
             loss = F.cross_entropy(model.logit_scale.exp().clamp(max=100) * model(x, gi, pad, tf) @ E[cand].T,
                                    torch.searchsorted(cand, y))
@@ -432,7 +436,7 @@ def run(seed, mode):
     torch.save(emb_out, f"{OUT}/eval_embeddings_{tag}.pt")
     calibration = None
     if mode.startswith(("single", "multi")) and subject_recs:
-        calibration = calibration_study(model.state_dict(), tau, seed, CAL_GRID if mode == "single" else CAL_GRID[:1])
+        calibration = calibration_study(model.state_dict(), tau, seed, CAL_GRID if mode in ("single", "multi0") else CAL_GRID[:1])
     return dict(seed=seed, mode=mode, extra_train_subjects=extra_subjects, selected=dict(step=best.get("step"), tau=tau, val_score=best["score"]), calibration=calibration,
                 summary_test_subjects=summarise(per_subject),
                 controls_test_subjects={c: summarise(t) for c, t in controls.items()},

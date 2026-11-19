@@ -60,3 +60,10 @@ Kaggle credentials come from the session proxy: export KAGGLE_USERNAME=joaquimma
 Reading: with one training subject and a 3.6 M model, the timing-free signal on a new subject is too weak for
 aggregation to help. Next lever tested: number of training subjects (v4 `single_multi`, then a scaling run once
 sub-13…32 are prepared).
+
+## 2026-11-19 09:30 UTC — calibration works modestly, scaling and aggregation do not
+- 10 min supervised calibration (fine-tune all weights, 100 steps): +4.4 points at 50 words [CI +2.6, +5.9], 7/8 subjects;
+  +1.5 at 250 words, 8/8. 1 min hurts. BatchNorm-only: nothing. See `reports/phase3.md`.
+- More training subjects: no reliable gain on disjoint text; the A+B improvement was stimulus sharing (caught before reporting).
+- Launched v6: calibration curve 5/10/20 min, steps 30/100/300, shuffled-label control, aggregation on calibrated models.
+- Kaggle GPU used so far: ~9.5 h (v4 2.5 h, scale 1.9 h, agg 0.5 h, earlier ~4.6 h).
