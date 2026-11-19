@@ -58,10 +58,20 @@ class TwoGpuExtractor(ev.CrissCrossWordEmbeddingExtractor):
         return super().to("cuda:1")
 
     def forward(self, features, subject_idx=None):
-        return super().forward(features.to("cuda:1"), subject_idx).to(features.device)
+        with torch.autocast("cuda", enabled=False):  # fp32 head: fp16 overflows (see fp16 note below)
+            return super().forward(features.float().to("cuda:1"), subject_idx).to(features.device)
 
 
 ev.CrissCrossWordEmbeddingExtractor = TwoGpuExtractor
+
+
+class Fp32SigLip(ev.SigLipLoss):
+    def forward(self, a, b, *args, **kw):
+        with torch.autocast("cuda", enabled=False):
+            return super().forward(a.float(), b.float(), *args, **kw)
+
+
+ev.SigLipLoss = Fp32SigLip
 
 
 def load_criss_cross_model(path, tok, device="cuda"):
