@@ -51,3 +51,12 @@ Queue, in order, each step only after the previous results are read and saved un
 4. Novelty check before any claim (include searches for critiques/controls). Never announce, only report.
 Limits: <= 6 h GPU in a row without a report entry; keep 5 h weekly reserve; nothing paid; nothing sent outside.
 Kaggle credentials come from the session proxy: export KAGGLE_USERNAME=joaquimmanjijung and any dummy KAGGLE_KEY.
+
+## 2026-11-19 07:15 UTC — repeated observations on unseen subjects: negative so far
+`results/phase3_agg_v1` (3 seeds, timing-free single-word model, retrieval over 250 words, balanced top-1, chance 0.4 %):
+- unseen subjects, 1 observation: 0.7–0.8 % (noise control 0.3–0.5 %); 10 observations: 1.5 / 0.0 / 0.5 % by seed → no reliable gain.
+- in-subject (held-out sub-0 recordings): 1.5–2.5 % with 1 observation, 1.2–4.7 % with 10 → also unstable.
+- BatchNorm recalibration on 10 min: −0.06 / +0.71 / +0.69 points at 50 words (top-10). Negligible.
+Reading: with one training subject and a 3.6 M model, the timing-free signal on a new subject is too weak for
+aggregation to help. Next lever tested: number of training subjects (v4 `single_multi`, then a scaling run once
+sub-13…32 are prepared).
