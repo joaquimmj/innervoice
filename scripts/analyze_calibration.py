@@ -48,7 +48,6 @@ def main():
                 print(f"  {n:32s} abs {100 * np.mean(list(v.values())):6.2f}  gain {fmt(summarise({k: v[k] - zero[k] for k in v}))}")
         for mode, ens in d.get("ensembles", {}).items():
             rows = ens["per_subject"]
-            ez = {k: rows[k]["zero"][m] for k in subjects if k in rows and m in rows[k]["zero"]}
             for name in sorted({n for r in rows.values() for n in r}):
                 v = {k: rows[k][name][m] for k in subjects if k in rows and name in rows[k] and m in rows[k][name]}
                 if v:
