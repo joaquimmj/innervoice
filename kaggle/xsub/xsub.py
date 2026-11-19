@@ -40,7 +40,7 @@ TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", 
 ALIGN_TASK = "Sherlock1"  # book heard by every subject including sub-0: shared stimulus for functional alignment
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
 VAL_SUBJECTS = [19, 20, 21, 22]  # model selection (epoch, prior temperature); never trained on, never reported
-TEST_SUBJECTS = [5, 6, 7, 8, 9, 10, 11, 12]  # never trained on; all reported numbers
+TEST_SUBJECTS = [5, 6, 7, 8, 9, 10, 11, 12]  # never trained on; all reported numbers (v9: widened via --set)
 POOL = [1, 2, 3, 4, 13, 14, 15, 16, 17, 18, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]  # extra training subjects, in order
 STEPS, EVAL_EVERY, BATCH_SEGS, MAXW = 6000, 1000, 48, 12
 LR, WD, N_NEG = 1e-3, 0.05, 4096
@@ -403,6 +403,8 @@ def calibration_study(state, tau, seed, grid):
         ev = [(rb, [i]) for i in range(len(rb["words"]))]
         row = {"zero": adapt_and_score(state, [], ev, "zero", 0, 0.0, tau, seed), "text_overlap_5gram": ngram_overlap(ra, rb)}
         for minutes in CAL_MINUTES:
+            if ra["x"].shape[1] < minutes * 60 * FS:  # recording A shorter than K minutes: subject not scored at this K
+                continue
             cal = [(ra, [i]) for i, w in enumerate(ra["words"]) if w[1] + WIN <= minutes * 60 * FS]
             if len(cal) < 8:
                 continue
