@@ -77,3 +77,8 @@ sub-13…32 are prepared).
   supervised fine-tuning, align + fine-tune, and the shuffled-label control. Sub-0's Sherlock1 MEG is never trained on.
 - To do when both finish: save under results/phase3_calibration_v2 and results/phase3_alignment_v1, paired gains
   with bootstrap CIs, update phase3.md; novelty check of functional alignment for MEG word decoding before any claim.
+
+## 2026-11-19 11:20 UTC — calibration curve
+- 5 / 10 / 20 min: +2.0 / +4.45 / +5.4 points at 50 words (8/8 subjects at 10 and 20 min); diminishing returns.
+- Shuffled-label control falls to chance (20.5 %): the gain needs the true pairing. v1 result replicated.
+- Kaggle GPU used so far: ~11.6 h. Alignment run still in progress.

@@ -23,6 +23,22 @@ Zero-shot on recording B: 26.6 % (50 words), 6.5 % (250 words). Gains are paired
 Hyper-parameters: 100 steps was chosen over 300 on validation subjects in every case. Caveats: CI over 8 subjects who
 all heard the same text; the shuffled-label control for calibration is in the next run, not this one.
 
+### 1b. Calibration curve and shuffled-label control (`results/phase3_calibration_v2`, commit 82c714e)
+Independent rerun (3 new trainings), fine-tuning all weights for 100 steps, zero-shot 26.4 % / 6.5 %:
+
+| Minutes (labelled words) | 50 words: gain [95 % CI] | improved | 250 words: gain [95 % CI] | improved |
+|---|---|---|---|---|
+| 5 (677) | +2.04 [+0.61, +3.56] | 7/8 | +0.65 [+0.14, +1.24] | 7/8 |
+| 10 (1 462) | +4.45 [+2.90, +6.00] → 30.8 % | 8/8 | +1.51 [+1.02, +1.99] | 8/8 |
+| 20 (3 085) | +5.41 [+3.47, +7.26] → 31.8 % | 8/8 | +1.75 [+1.34, +2.14] | 8/8 |
+| 10, **labels shuffled** (control) | −5.87 [−7.60, −4.14] → 20.5 % (chance) | 0/8 | −1.74 [−2.32, −1.09] | 1/8 |
+
+The 10-min gain replicates (+4.42 in v1, +4.45 here). Returns diminish: +2.4 points from 5 to 10 min, +1.0 from 10
+to 20. With shuffled labels the model falls to chance, so the gain needs the true brain–word pairing. 300 steps give
+the same result as 100; 30 steps give less at 10–20 min.
+With 10 min of calibration, averaging 10 observations of a word reaches 2.4 % balanced top-1 over 250 words
+(zero-shot 0.25 %, chance 0.4 %): statistically above zero-shot (8/8 subjects) but far too low to be useful.
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.

@@ -8,3 +8,4 @@
 | phase3_calibration_v1 | 3 | Timing-free model, 10 min supervised calibration on unseen subjects (rec B, 8 subjects, 3 seeds) | +4.42 pts @50 [95% CI +2.64, +5.92] → 31.0 %; +1.47 @250 [+1.08, +1.92]; 1 min: −1.9 | `python scripts/kaggle_run.py kaggle/xsub` at commit 29c5c1e |
 | phase3_agg_v1 | 3 | Repeated observations, zero-shot, 250 words, balanced top-1 | n=1 0.7–0.8 %, n=10 0.0–1.5 % (chance 0.4) — negative | commit cc6fad8 |
 | phase3_scaling_v1 | 3 | +0/4/10/20 extra training subjects, rec B @50 | 26.4 / 26.2 / 28.3 / 25.8 — no reliable gain | commit c632f9a |
+| phase3_calibration_v2 | 3 | Calibration curve, fine-tune 100 steps, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +2.04 / +4.45 / +5.41 pts @50; shuffled labels: −5.87 (chance) | commit 82c714e |
