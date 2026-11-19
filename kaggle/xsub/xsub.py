@@ -13,7 +13,11 @@ import h5py, numpy as np, torch, torch.nn as nn, torch.nn.functional as F
 
 # (seed, segment mode). "sentence": words grouped by annotated sentence + position embedding (uses sentence
 # boundaries from the transcript). "chunk": fixed runs of MAXW consecutive words, no position input: no text-side metadata.
-RUNS = [(0, "sentence"), (1, "sentence"), (2, "sentence"), (0, "chunk"), (1, "chunk"), (2, "chunk")]
+# "single": one word per forward pass, no cross-word context (windows cannot be compared with each other).
+# "timing": NO MEG at all; the model only sees annotation-derived word timing (gap to previous/next onset, duration)
+#           with sentence segmentation. Measures how much of the score the transcript's rhythm explains by itself.
+# v1 (3 seeds of sentence/chunk, results/phase2_xsub_v1) showed the 7 s shift control stays far above chance.
+RUNS = [(0, "single"), (1, "single"), (2, "single"), (0, "timing"), (1, "timing"), (2, "timing"), (0, "sentence"), (0, "chunk")]
 TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", "Sherlock7"]  # sub-0, != test book
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
 VAL_SUBJECTS = [1, 2, 3, 4]  # model selection (epoch, prior temperature); never used for the reported test numbers
@@ -28,7 +32,7 @@ OUT = os.environ.get("XSUB_OUT", "/kaggle/working" if os.path.isdir("/kaggle/wor
 SMOKE = os.environ.get("XSUB_SMOKE") == "1"  # tiny CPU run on synthetic data (tests/test_xsub.py)
 if SMOKE:
     STEPS, EVAL_EVERY, BATCH_SEGS, N_NEG, RETRIEVAL_SIZES = 30, 15, 8, 16, [5, 10]
-    RUNS = [(0, "sentence"), (0, "chunk")]
+    RUNS = [(0, "sentence"), (0, "single"), (0, "timing")]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -59,7 +63,7 @@ def load_recordings():
             s = int(round(float(r["timemeg"]) * FS)) - ON
             if s < 0 or s + WIN > x.shape[1]:
                 continue
-            words.append((w, s, int(float(r["sentenceidx"] or -1))))
+            words.append((w, s, int(float(r["sentenceidx"] or -1)), float(r["duration"] or 0)))
         if words:
             recs.append(dict(sub=sub, name=os.path.basename(cache), x=torch.from_numpy(x).half(), words=words))
     return recs
@@ -76,9 +80,9 @@ for r in recs:
         eval_groups.setdefault(f"sub{r['sub']}", []).append(r)
 eval_groups = {k: v for k, v in eval_groups.items() if v}
 
-train_counts = collections.Counter(w for r in train_recs for w, _, _ in r["words"])
+train_counts = collections.Counter(w for r in train_recs for w, *_ in r["words"])
 vocab = [w for w, _ in train_counts.most_common()]  # train types by frequency
-test_types = sorted({w for g in eval_groups.values() for r in g for w, _, _ in r["words"]} - set(vocab))
+test_types = sorted({w for g in eval_groups.values() for r in g for w, *_ in r["words"]} - set(vocab))
 all_types = vocab + test_types
 tid = {w: i for i, w in enumerate(all_types)}
 n_train_types = len(vocab)
@@ -111,11 +115,11 @@ E = F.normalize(E - E[:n_train_types].mean(0, keepdim=True), dim=-1).to(dev)  # 
 
 def segments(group, mode):
     """Segments of <= MAXW consecutive words (split at sentence ends in "sentence" mode): list of (rec, [word indices])."""
-    segs = []
+    segs, by_sentence, maxw = [], mode in ("sentence", "timing"), 1 if mode == "single" else MAXW
     for r in group:
         cur, last = [], None
-        for i, (_, _, sent) in enumerate(r["words"]):
-            if cur and ((mode == "sentence" and sent != last) or len(cur) == MAXW):
+        for i, (_, _, sent, _) in enumerate(r["words"]):
+            if cur and ((by_sentence and sent != last) or len(cur) == maxw):
                 segs.append((r, cur)); cur = []
             cur.append(i); last = sent
         if cur:
@@ -123,23 +127,33 @@ def segments(group, mode):
     return segs
 
 
+ctrl_rng = np.random.default_rng(123)
+
+
 def batch(segs, control=None):
-    """-> x (N,306,WIN) baseline-corrected, labels (N,), seg index (S,L) into N, pad (S,L).
-    control="shift": MEG taken 7 s later than the word (misaligned); "noise": MEG replaced by white noise."""
-    xs, ys, gi = [], [], torch.zeros(len(segs), MAXW, dtype=torch.long)
+    """-> x (N,306,WIN) baseline-corrected, labels (N,), seg index (S,L) into N, pad (S,L), timing (N,3).
+    Controls: "shift" = MEG taken 7 s later for every word (misaligned, relative timing of windows kept);
+    "jitter" = each word's MEG taken at an independent random time (misaligned, relative timing destroyed);
+    "noise" = MEG replaced by white noise."""
+    xs, ys, tf, gi = [], [], [], torch.zeros(len(segs), MAXW, dtype=torch.long)
     pad = torch.ones(len(segs), MAXW, dtype=torch.bool)
     for s, (r, idx) in enumerate(segs):
         for j, i in enumerate(idx):
-            w, st, _ = r["words"][i]
+            w, st, _, dur = r["words"][i]
             gi[s, j], pad[s, j] = len(xs), False
+            prev = (st - r["words"][i - 1][1]) / FS if i > 0 else 5.0
+            nxt = (r["words"][i + 1][1] - st) / FS if i + 1 < len(r["words"]) else 5.0
+            tf.append((min(prev, 5.0), min(nxt, 5.0), min(dur, 5.0)))
             if control == "shift":
                 st = (st + 7 * FS) % (r["x"].shape[1] - WIN)
+            elif control == "jitter":
+                st = int(ctrl_rng.integers(0, r["x"].shape[1] - WIN))
             xs.append(r["x"][:, st:st + WIN]); ys.append(tid[w])
     x = torch.stack(xs).to(dev).float()
     if control == "noise":
         x = torch.randn_like(x)
     x = (x - x[:, :, :ON].mean(-1, keepdim=True)).clamp(-5, 5)  # baseline = pre-onset second
-    return x, torch.tensor(ys, device=dev), gi.to(dev), pad.to(dev)
+    return x, torch.tensor(ys, device=dev), gi.to(dev), pad.to(dev), torch.log1p(torch.tensor(tf, device=dev))
 
 
 # ---------------------------------------------------------------- model
@@ -154,9 +168,10 @@ class Block(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, use_pos):
+    def __init__(self, use_pos, timing_only=False):
         super().__init__()
-        d, D, self.use_pos = D_CONV, D_EMB, use_pos
+        d, D, self.use_pos, self.timing_only = D_CONV, D_EMB, use_pos, timing_only
+        self.tim = nn.Sequential(nn.Linear(3, D), nn.GELU(), nn.Linear(D, D), nn.GELU())
         self.cnn = nn.Sequential(nn.Conv1d(306, d, 1), nn.BatchNorm1d(d), nn.GELU(), Block(d), Block(d), Block(d),
                                  nn.Conv1d(d, d // 2, 5, 2, 2), nn.BatchNorm1d(d // 2), nn.GELU(),
                                  nn.Conv1d(d // 2, d // 2, 5, 2, 2), nn.BatchNorm1d(d // 2), nn.GELU(),
@@ -167,8 +182,8 @@ class Decoder(nn.Module):
         self.proj = nn.Linear(D, 1024)
         self.logit_scale = nn.Parameter(torch.tensor(math.log(20.0)))
 
-    def forward(self, x, gi, pad):
-        e = self.cnn(x)  # (N, D)
+    def forward(self, x, gi, pad, tf):
+        e = self.tim(tf) if self.timing_only else self.cnn(x)  # (N, D)
         h = e[gi] * (~pad)[..., None] + (self.pos.weight[None] if self.use_pos else 0)
         e = (e[gi] + self.norm(self.ctx(h, src_key_padding_mask=pad)))[~pad]  # (N, D), order of x preserved
         return F.normalize(self.proj(e).float(), dim=-1)
@@ -188,9 +203,9 @@ def embed(model, group, mode, control=None):
     zs, ys = [], []
     segs = segments(group, mode)
     for i in range(0, len(segs), 128):
-        x, y, gi, pad = batch(segs[i:i + 128], control)
+        x, y, gi, pad, tf = batch(segs[i:i + 128], control)
         with torch.autocast(dev, dtype=torch.float16, enabled=dev == "cuda"):
-            zs.append(model(x, gi, pad))
+            zs.append(model(x, gi, pad, tf))
         ys.append(y)
     return torch.cat(zs), torch.cat(ys)
 
@@ -227,7 +242,7 @@ test_keys = [k for k in eval_groups if k != "sub0_heldout" and k not in val_keys
 def run(seed, mode):
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
     t0 = time.time()
-    model = Decoder(use_pos=mode == "sentence").to(dev)
+    model = Decoder(use_pos=mode in ("sentence", "timing"), timing_only=mode == "timing").to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WD)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, LR, total_steps=STEPS, pct_start=0.05)
     scaler = torch.amp.GradScaler(enabled=dev == "cuda")
@@ -235,10 +250,11 @@ def run(seed, mode):
     history, best, n0 = [], dict(score=-1), RETRIEVAL_SIZES[0]
     for step in range(1, STEPS + 1):
         model.train()
-        x, y, gi, pad = batch([train_segs[i] for i in rng.integers(0, len(train_segs), BATCH_SEGS)])
+        n_segs = BATCH_SEGS * (MAXW // 2 if mode == "single" else 1)  # similar number of words per step in every mode
+        x, y, gi, pad, tf = batch([train_segs[i] for i in rng.integers(0, len(train_segs), n_segs)])
         cand = torch.unique(torch.cat([y, torch.multinomial(neg_p, min(N_NEG, n_train_types)).to(dev)]))
         with torch.autocast(dev, dtype=torch.float16, enabled=dev == "cuda"):
-            z = model(x, gi, pad)
+            z = model(x, gi, pad, tf)
         logits = model.logit_scale.exp().clamp(max=100) * z @ E[cand].T
         loss = F.cross_entropy(logits, torch.searchsorted(cand, y))
         opt.zero_grad(set_to_none=True)
@@ -268,7 +284,7 @@ def run(seed, mode):
         z, y = embed(model, g, mode)
         per_subject[k] = score(z, y, tau, gen)
         emb_out[k] = dict(z=z.half().cpu(), y=y.cpu())
-    for control in ("shift", "noise"):  # must fall to chance if the model reads the brain and not the metadata
+    for control in ("shift", "jitter", "noise"):  # must fall to chance if the model reads word-locked brain activity
         controls[control] = {k: score(*embed(model, eval_groups[k], mode, control), tau, gen) for k in test_keys}
 
     def mean_over(table, *path):
