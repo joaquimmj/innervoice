@@ -41,3 +41,20 @@ Verdict: our Phase 2 timing result is an **independent replication**, not a new 
 independent-random-time dissociation. Neither justifies a paper on its own.
 Process failure: the Phase 0 search (2026-11-18) missed 2609.40359; queries were about vocabulary size and
 calibration, none about controls/shortcuts. From now on each novelty check also searches for critiques and controls.
+
+## 2026-11-19 — check of the timing-free cross-subject calibration result → PARTIALLY published
+Sub-agent read: arXiv HTML of 2609.40359, 2609.03231, 2608.25204 (full text); SimpleB2T code; rohit-ravi2/libribrain-2026
+(PREDICTIONS.md, paper_leakage_draft.md, README, RULES). Figures not read (numbers in figures UNVERIFIED).
+- 2609.40359 (Oxford): cross-subject appendix (A.3) runs only the joint and synthetic decoders on other subjects; the
+  timing-free decoder is never evaluated on unseen subjects (confirmed in `simpleb2t/experiments.py`). No calibration.
+- 2608.25204 / 2609.03231 (LibriBrain100, PNPL competition): contextual MEG-XL, 40→20→10 min "minimal degradation";
+  no timing control. Winners due 2026-12-01.
+- rohit-ravi2/libribrain-2026 (public competition log, not a paper): sub-0-only single-window CNN on 4 unseen subjects
+  0.211 → 0.266 with an input map; 306×306 input map on 10–30 min: 0.274 / 0.297 / 0.307 vs 0.266; BatchNorm
+  recalibration on new subjects not detected; extra shallow subjects hurt; label-grouped *posterior* averaging helps
+  (+0.07 with 2, +0.22 with 16 occurrences) on a contextual decoder.
+Verdict: no paper reports a seeded, text-disjoint calibration curve with CIs for a strictly one-window decoder; the
+qualitative pattern is already public in that repo. Our result is a quantified replication-plus-extension, not a first.
+To reconcile before any write-up: (1) our embedding-averaging null vs their posterior-averaging gain; (2) report
+against input-free controls (our noise control = 20 %), not only nominal chance; (3) re-check after 2026-12-01.
+Not searched: bioRxiv, OpenReview, Scholar citations, Kaggle discussions.
