@@ -103,3 +103,7 @@ sub-13…32 are prepared).
 ## 2026-11-19 14:00 UTC — weak decoder: alignment still works; Procrustes does not
 - Weak decoder: ridge alignment +4.5 at 50 words (8/8), so decoder strength does not explain the public null.
 - Procrustes +0.1 (n.s.). Next to test for the null: identity-shrinkage penalty as in rohit-ravi2 P1b.
+
+## 2026-11-19 14:45 UTC — identity shrinkage
+- ‖W − I‖² penalty: works when weak (+3.6), vanishes when strong (λ ≥ 1). Plausible but unverified cause of the public null.
+- Kaggle GPU used so far: ~16 h. 28-subject run still in progress.

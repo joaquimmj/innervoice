@@ -89,6 +89,18 @@ Decoder trained 10× shorter (600 steps; held-out sub-0 36–37 % vs 41–48 % f
 - An orthogonal map gives nothing: the useful map is not a rotation of the sensor space but a regression that also
   re-weights and denoises.
 
+### 1e. Shrinking the map towards the identity (`results/phase3_identity_v1`, commit 0266b10)
+Full decoder, 10 min, 8 subjects, 3 seeds. Penalty λ·‖W − I‖² (as in the public null, rohit-ravi2 P1b), λ relative
+to the mean input variance:
+
+| λ | 0.01 | 0.1 | 1 | 10 | (shrink to 0, λ = 0.1) |
+|---|---|---|---|---|---|
+| gain @50 words | +3.59 [+1.58, +6.12] | +2.56 [+1.26, +4.22] | +0.02 [−0.75, +0.93] | −0.12 | +4.32 [+2.19, +6.76] |
+
+Shrinking towards the identity works when weak and vanishes when strong (the map stays ≈ identity). A strong
+effective penalty is a plausible explanation of the public null, but their λ is not on our scale (unverified):
+**the null is not explained yet**.
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.

@@ -12,3 +12,4 @@
 | phase3_alignment_v1 | 3 | Label-free ridge alignment to sub-0 on shared audio, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +3.59 / +4.32 / +5.94 @50; align+fine-tune 20 min +6.96 (33.3 %) — controls pending | commit 89b72fe |
 | phase3_alignment_v2 | 3 | Alignment controls, 8 unseen subjects, 3 seeds, @50 | align − random pairing: +7.7 / +8.1 / +8.0 (5/10/20 min, 8/8); align − covariance-only: +4.1 / +4.5 / +5.8 (8/8) | commit f6d9558 |
 | phase3_weak_v1 | 3 | Weak (600-step) decoder, 10 min, @50 | ridge align +4.46 (8/8); random pairing −3.50; Procrustes +0.10; supervised +1.76 | commit d83a868 |
+| phase3_identity_v1 | 3 | Identity-shrinkage alignment, 10 min, @50 | λ 0.01 / 0.1 / 1 / 10: +3.59 / +2.56 / +0.02 / −0.12 (shrink-to-zero +4.32) | commit 0266b10 |
