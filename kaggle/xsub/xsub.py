@@ -58,7 +58,7 @@ if SMOKE:
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
     CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4),
-                ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("procrustes", 0, 0.1)]
+                ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("procrustes", 0, 0.1), ("alignid", 0, 0.1)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -351,6 +351,8 @@ def fit_alignment(cal, lam, mode="align"):
             c00 += torch.einsum("bit,bjt->ij", x0, x0)
         W = _sqrtm(c00 + reg) @ _sqrtm(cxx + reg, inv=True)
         return W.float(), len(new), float(np.median(dt)) if dt else None
+    if mode == "alignid":  # penalty lam*||W - I||^2 (shrink towards identity), as in rohit-ravi2 P1b
+        return ((cyx + reg) @ torch.linalg.inv(cxx + reg)).float(), len(new), float(np.median(dt)) if dt else None
     return (cyx @ torch.linalg.inv(cxx + reg)).float(), len(new), float(np.median(dt)) if dt else None
 
 
@@ -359,7 +361,7 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model.load_state_dict(state)
     model.eval()
     info = {}
-    if method.startswith("align") or method in ("coral", "procrustes"):
+    if method.startswith("align") or method in ("coral", "procrustes"):  # includes alignid
         W, n_pairs, dt = fit_alignment(cal, lr if method != "alignfull" else 0.1, "align" if method == "alignfull" else method)
         if W is None:
             return None
