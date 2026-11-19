@@ -1,0 +1,505 @@
+{
+ "megxl_commit": "97da04171d22e8fe4822cfeb3047a57ecf86b318",
+ "recordings": [
+  {
+   "path": "MOCHATIMIT/derivatives/serialised/sub-0_ses-1_task-MOCHATIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 22.1,
+   "finite": true
+  },
+  {
+   "path": "MOCHATIMIT/derivatives/serialised/sub-0_ses-2_task-MOCHATIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 22.5,
+   "finite": true
+  },
+  {
+   "path": "MOCHATIMIT/derivatives/serialised/sub-0_ses-3_task-MOCHATIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.5,
+   "finite": true
+  },
+  {
+   "path": "MOCHATIMIT/derivatives/serialised/sub-0_ses-4_task-MOCHATIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 22.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-10_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 40.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-1_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 31.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-2_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 45.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-3_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 50.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-4_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 26.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-5_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 23.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-6_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 69.4,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-7_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 38.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-8_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 49.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock8/derivatives/serialised/sub-0_ses-9_task-Sherlock8_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 62.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-0_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 4.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-10_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 27.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-11_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 38.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-12_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 35.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-1_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 59.4,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-2_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 45.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-3_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-4_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 37.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-5_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 37.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-6_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 38.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-7_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 60.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-8_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 49.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock9/derivatives/serialised/sub-0_ses-9_task-Sherlock9_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 44.2,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-10_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.8,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-11_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 37.4,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-12_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.6,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-13_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 37.5,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-14_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.5,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-1_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.5,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-2_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.6,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-3_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.6,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-4_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.1,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-5_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 35.8,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-6_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.7,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-7_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 35.9,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-8_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.9,
+   "finite": true
+  },
+  {
+   "path": "TIMIT/derivatives/serialised/sub-0_ses-9_task-TIMIT_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 36.6,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-10_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 9.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-11_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.5,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-12_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-13_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 17.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-14_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 15.9,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-15_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 15.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-16_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 13.4,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-17_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-18_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.0,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-19_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 10.5,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-1_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.2,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-20_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 13.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-21_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.4,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-22_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.7,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-23_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.4,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-24_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.6,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-25_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 17.6,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-26_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.6,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-27_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 8.0,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-28_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 14.6,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-29_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 13.2,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-2_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 16.5,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-30_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.5,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-3_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.3,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-4_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.0,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-5_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 15.1,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-6_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 16.3,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-7_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 19.8,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-8_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 9.2,
+   "finite": true
+  },
+  {
+   "path": "TheMoth/derivatives/serialised/sub-0_ses-9_task-TheMoth_run-1_proc-bads+headpos+sss+notch+bp+ds_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.0,
+   "finite": true
+  }
+ ],
+ "hours": 32.78,
+ "cache_GiB": 6.74,
+ "disk_free_GiB": 12.7
+}
