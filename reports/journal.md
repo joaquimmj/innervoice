@@ -111,3 +111,11 @@ sub-13…32 are prepared).
 ## 2026-11-19 15:20 UTC — alignment replicates on 28 subjects
 - 5 min: alignment +4.4 (24/28) vs supervised +2.7; alignment − supervised +1.7 [+0.5, +2.9]. 10 min: +6.5 vs +6.3.
 - Running: more-data run (sub-0 ~78 h) with seed ensemble. Kaggle GPU used so far: ~18 h.
+
+## 2026-11-19 16:05 UTC — two improvement runs in flight
+- `innervoice-xsub-data` (commit 40b5dfc): sub-0 decoder trained on ~78 h (adds LibriBrain2 Sherlock8/9, TIMIT,
+  MOCHA-TIMIT, TheMoth, 32.8 h prepared on CPU) + 3-seed ensemble, 8 test subjects, K = 5/10/20.
+- `innervoice-xsub-emb` (commit 2360161): label-free embedding-level alignment (input map initialised by ridge, then
+  trained so the decoder's embeddings of the new subject match the frozen decoder's embeddings of sub-0 at the same
+  moments of the shared audio). If positive, add a random-pairing control before reporting.
+- Paper draft started in drafts/paper/main.tex.
