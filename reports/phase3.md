@@ -178,3 +178,21 @@ only 6–24 min each (≈5 h in total against 45 h of sub-0).
 - Not a breakthrough: absolute accuracy stays far from the timing-inflated literature numbers and from in-subject
   performance (38–48 % at 50 words on held-out sub-0 recordings).
 - Novelty of the calibration result: not yet checked (rule 1).
+
+## 4. MEG-XL's own word decoder and the timing shortcut (`results/phase3_megxl_shortcut_v1`, commit 5d8cffc) — pilot
+MEG-XL's 150 s inputs are 50 concatenated 3 s windows of consecutive words (overlapping in real time); its encoder
+attends across all of them. We ran MEG-XL's own fine-tuning code (pinned commit, fp16 encoder / fp32 head on 2×T4)
+on sub-0, session split (train ses-1..8, val ses-9, test ses-10 of Sherlock 1–7), 15 % of the training segments,
+2 epochs, 150 val/test segments (7 500 words, identical for both rows), seed 42.
+
+| input | balanced top-10 @50 (chance 20) | @250 (chance 4) |
+|---|---|---|
+| synthetic AR(1) noise read at the true word windows (no brain data) | **55.7** | **18.7** |
+| real MEG | 54.9 | 17.9 |
+
+- With this amount of fine-tuning data, MEG-XL's accuracy is fully reproduced by a signal that contains no brain
+  activity: the overlap of adjacent windows (true inter-word intervals) is enough.
+- MEG-XL's built-in noise baseline (independent noise per input) cannot reveal this.
+- **Limits:** one seed; 15 % of the data and 2 epochs (with all data, MEG may add more than timing); within-subject only;
+  shuffled non-overlapping control not yet run (GPU quota). Runs took 4.1–4.25 h each: data loading, not GPU
+  (6.8 s per iteration vs 1.8 s compute).

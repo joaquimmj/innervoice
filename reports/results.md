@@ -16,3 +16,4 @@
 | phase3_wide_v1 | 3 | 28 unseen subjects, @50 | align 5 min +4.41 (24/28), 10 min +6.52 (17/18); random pairing −2.88 / −1.58; supervised +2.70 / +6.30; align+ft 10 min +7.48 → 32.0 % | commit d83a868 |
 | phase3_data_v1 | 3 | sub-0 ~78 h, 8 unseen subjects, @50 | zero-shot 28.5 (vs 26.4); align 20 min 33.2 %; ensemble zero-shot +0.3 (n.s.); retrieval set differs from earlier runs | commit 40b5dfc |
 | phase3_emb_v1 | 3 | ridge map refined toward sub-0 decoder embeddings, 8 unseen subjects, @50 | negative: best variant +0.45 [−0.62, +1.69] vs ridge at 10 min; larger steps −1.3 to −1.7 | commit 2360161 |
+| phase3_megxl_shortcut_v1 | 1 (pilot) | MEG-XL own pipeline, sub-0, 15 % train, 2 epochs, @50 | synthetic signal at true word windows 55.7 vs real MEG 54.9 (chance 20): timing shortcut | commit 5d8cffc |

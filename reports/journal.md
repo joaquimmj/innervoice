@@ -128,3 +128,8 @@ sub-13…32 are prepared).
 ## 2026-11-19 17:45 UTC — embedding-level map refinement: negative
 - Refining the ridge map toward sub-0's decoder embeddings does not help (+0.45 n.s. at best, −1.7 at 20 min with
   larger steps). Ridge on raw sensors stays the method. Saved in results/phase3_emb_v1.
+
+## 2026-11-19 23:00 UTC — MEG-XL uses the timing shortcut (pilot)
+- In MEG-XL's own code, a no-brain synthetic signal read at the true word windows: 55.7 % top-10 @50; real MEG 54.9 %.
+- Next (after quota reset): shuffled non-overlapping control, 3 seeds, more data; then timing-free MEG-XL on new
+  subjects vs our alignment. Fix data loading (4 h per run instead of ~1 h). GPU this week: ~30.5 h (estimate).
