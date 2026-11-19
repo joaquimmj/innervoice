@@ -82,3 +82,8 @@ sub-13…32 are prepared).
 - 5 / 10 / 20 min: +2.0 / +4.45 / +5.4 points at 50 words (8/8 subjects at 10 and 20 min); diminishing returns.
 - Shuffled-label control falls to chance (20.5 %): the gain needs the true pairing. v1 result replicated.
 - Kaggle GPU used so far: ~11.6 h. Alignment run still in progress.
+
+## 2026-11-19 12:40 UTC — alignment matches supervised calibration
+- Label-free alignment to sub-0 on shared audio: +3.6 / +4.3 / +5.9 points (5/10/20 min); align+fine-tune 20 min +7.0 → 33.3 %.
+- Launched v8 controls (`innervoice-xsub-align`, version 2): random pairing (alignshuf) and covariance-only (coral).
+- Kaggle GPU used so far: ~13.3 h.

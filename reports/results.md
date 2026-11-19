@@ -9,3 +9,4 @@
 | phase3_agg_v1 | 3 | Repeated observations, zero-shot, 250 words, balanced top-1 | n=1 0.7–0.8 %, n=10 0.0–1.5 % (chance 0.4) — negative | commit cc6fad8 |
 | phase3_scaling_v1 | 3 | +0/4/10/20 extra training subjects, rec B @50 | 26.4 / 26.2 / 28.3 / 25.8 — no reliable gain | commit c632f9a |
 | phase3_calibration_v2 | 3 | Calibration curve, fine-tune 100 steps, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +2.04 / +4.45 / +5.41 pts @50; shuffled labels: −5.87 (chance) | commit 82c714e |
+| phase3_alignment_v1 | 3 | Label-free ridge alignment to sub-0 on shared audio, rec B, 8 unseen subjects, 3 seeds | 5 / 10 / 20 min: +3.59 / +4.32 / +5.94 @50; align+fine-tune 20 min +6.96 (33.3 %) — controls pending | commit 89b72fe |

@@ -39,6 +39,25 @@ the same result as 100; 30 steps give less at 10–20 min.
 With 10 min of calibration, averaging 10 observations of a word reaches 2.4 % balanced top-1 over 250 words
 (zero-shot 0.25 %, chance 0.4 %): statistically above zero-shot (8/8 subjects) but far too low to be useful.
 
+### 1c. Label-free functional alignment to the training subject (`results/phase3_alignment_v1`, commit 89b72fe)
+Every LibriBrain100 subject heard the same book (Sherlock1) as sub-0. A 306×306 ridge map from the new subject's MEG
+to sub-0's MEG on the same audio (word-locked windows paired through the shared stimulus timeline; onset intervals
+match exactly, 0.0 s) is fitted on the first K minutes of recording A; the unchanged sub-0 decoder is applied to
+the mapped recording B. Sub-0's Sherlock1 MEG is never used for training. Zero-shot 26.4 % / 6.5 %. 3 seeds, 8 subjects.
+
+| Method | 5 min (50 w) | 10 min (50 w) | 20 min (50 w) | 20 min (250 w) |
+|---|---|---|---|---|
+| supervised fine-tune (labels) | +2.01 [+0.57, +3.52] | +4.41 [+2.86, +5.94] | +5.37 [+3.48, +7.16] | +1.71 [+1.31, +2.10] |
+| **alignment, ridge 0.1 (no decoder training)** | **+3.59 [+1.67, +5.60]** | +4.32 [+2.19, +6.76] | +5.94 [+3.83, +8.13] | +1.47 [+0.80, +2.14] |
+| alignment, then fine-tune | +1.69 [−0.65, +3.92] | +4.95 [+2.26, +7.63] | **+6.96 [+4.89, +8.82] → 33.3 %** | **+2.31 [+1.96, +2.66]** |
+| shuffled-label fine-tune (control) | −6.71 | −5.83 | −5.14 | −1.77 |
+
+Paired difference alignment − supervised at 50 words: +1.58 [+0.41, +2.87] at 5 min, −0.08 at 10 min, +0.58 at
+20 min (n.s.). Alignment + fine-tune − supervised at 20 min: +1.60 [+0.72, +2.57] (50 w), +0.60 [+0.22, +1.06] (250 w).
+**Not yet a claim:** the controls that separate stimulus correspondence from a generic sensor re-mapping
+(random pairing; covariance matching only) are running (v8). Alignment also requires the new subject to listen to
+the same audio as the training subject; it removes the need to train the decoder, not the need for a known stimulus.
+
 ## 2. Repeated observations of the same word (`results/phase3_agg_v1`, commit cc6fad8) — negative
 Averaging the embeddings of n occurrences, retrieval over 250 words, balanced top-1 (chance 0.4 %), zero-shot:
 n=1: 0.7–0.8 %; n=10: 1.5 / 0.0 / 0.5 % by seed (noise control 0.0–0.5 %). No reliable gain on unseen subjects.

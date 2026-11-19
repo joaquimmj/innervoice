@@ -33,7 +33,9 @@ CAL_MINUTES = [5, 10, 20]
 # input: bn + a 306x306 input mixing matrix (init identity) fitted on labelled calibration words. full: bn + all weights.
 # fullshuf: same as full but calibration labels are permuted (control: any gain must come from brain-label pairing).
 # align: lr field = ridge strength relative to the mean input variance. alignfull: align (0.1) then fine-tune all weights.
-CAL_GRID = [("align", 0, 0.01), ("align", 0, 0.1), ("align", 0, 1.0), ("alignfull", 100, 1e-4), ("full", 100, 1e-4), ("fullshuf", 100, 1e-4)]
+# v8 controls for alignment: alignshuf = same ridge map but each new-subject window is paired with a random sub-0
+# window of the shared book (correspondence destroyed); coral = map that only matches sensor covariances (no pairing).
+CAL_GRID = [("align", 0, 0.1), ("alignshuf", 0, 0.1), ("coral", 0, 0.1), ("full", 100, 1e-4)]
 TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", "Sherlock7"]  # sub-0, != test book
 ALIGN_TASK = "Sherlock1"  # book heard by every subject including sub-0: shared stimulus for functional alignment
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
@@ -55,7 +57,8 @@ if SMOKE:
     RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing")], [1]
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
-    CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4)]
+    CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4),
+                ("alignshuf", 0, 0.1), ("coral", 0, 0.1)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -313,7 +316,13 @@ for _r in align_recs:  # unique word n-grams of sub-0's recordings of the shared
         align_index[_k] = None if _k in align_index else (_r, _j)
 
 
-def fit_alignment(cal, lam):
+def _sqrtm(c, inv=False):
+    w, v = torch.linalg.eigh(c)
+    w = w.clamp_min(w.max() * 1e-6)
+    return (v * (w ** (-0.5 if inv else 0.5))) @ v.T
+
+
+def fit_alignment(cal, lam, mode="align"):
     """Ridge map W (306x306) with W @ x_new ~ x_sub0 on word-locked windows of the same audio. No word labels used:
     words only provide the common timeline of the stimulus. Returns (W, n_pairs, median onset-interval mismatch in s)."""
     new, ref, dt = [], [], []
@@ -325,11 +334,20 @@ def fit_alignment(cal, lam):
                 dt.append(abs((r["words"][i + 1][1] - r["words"][i][1]) - (hit[0]["words"][hit[1] + 1][1] - hit[0]["words"][hit[1]][1])) / FS)
     if len(new) < 50:
         return None, len(new), None
+    if mode == "alignshuf":  # same windows, random pairing within the shared book
+        ref = [ref[i] for i in np.random.default_rng(7).permutation(len(ref))]
     cxx, cyx = torch.zeros(306, 306, device=dev, dtype=torch.float64), torch.zeros(306, 306, device=dev, dtype=torch.float64)
     for b in range(0, len(new), 256):
         xn, x0 = batch(new[b:b + 256])[0].double(), batch(ref[b:b + 256])[0].double()
         cxx += torch.einsum("bit,bjt->ij", xn, xn); cyx += torch.einsum("bit,bjt->ij", x0, xn)
     reg = lam * cxx.diagonal().mean() * torch.eye(306, device=dev, dtype=torch.float64)
+    if mode == "coral":
+        c00 = torch.zeros_like(cxx)
+        for b in range(0, len(ref), 256):
+            x0 = batch(ref[b:b + 256])[0].double()
+            c00 += torch.einsum("bit,bjt->ij", x0, x0)
+        W = _sqrtm(c00 + reg) @ _sqrtm(cxx + reg, inv=True)
+        return W.float(), len(new), float(np.median(dt)) if dt else None
     return (cyx @ torch.linalg.inv(cxx + reg)).float(), len(new), float(np.median(dt)) if dt else None
 
 
@@ -338,8 +356,8 @@ def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
     model.load_state_dict(state)
     model.eval()
     info = {}
-    if method.startswith("align"):
-        W, n_pairs, dt = fit_alignment(cal, lr if method == "align" else 0.1)
+    if method.startswith("align") or method == "coral":
+        W, n_pairs, dt = fit_alignment(cal, lr if method != "alignfull" else 0.1, "align" if method == "alignfull" else method)
         if W is None:
             return None
         model.A = nn.Parameter(W, requires_grad=False)
