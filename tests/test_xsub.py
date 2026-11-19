@@ -30,15 +30,20 @@ def test_xsub_smoke(tmp_path):
     for run in range(1, 5):
         make_recording(tmp_path / "a", 0, "Sherlock2", run, list(rng.choice(types, 120)), patterns, rng)
     for sub in (1, 5):
-        make_recording(tmp_path / "b", sub, "Sherlock1", 1, list(rng.choice(types + ["newword1", "newword2"], 150)), patterns, rng)
+        for run in (1, 2):
+            make_recording(tmp_path / "b", sub, "Sherlock1", run, list(rng.choice(types + ["newword1", "newword2"], 150)), patterns, rng)
     env = dict(os.environ, XSUB_INPUT=str(tmp_path), XSUB_OUT=str(tmp_path), XSUB_SMOKE="1", CUDA_VISIBLE_DEVICES="")
     r = subprocess.run([sys.executable, str(ROOT / "kaggle" / "xsub" / "xsub.py")], env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-3000:]
     res = json.loads((tmp_path / "xsub_result.json").read_text())
     assert res["test_subjects"] == ["sub5"] and res["data"]["unseen_types"] == 2
-    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "timing")]
+    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "single_multi"), (0, "timing")]
     for r in res["runs"]:
         top = r["per_subject"]["sub5"]["top5"]
         assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0
         assert set(r["controls_test_subjects"]) == {"shift", "jitter", "noise"}
+    cal = res["runs"][1]["calibration"]
+    assert set(cal["summary_test_subjects"]) == {"zero", "bn_k1", "input_k1", "full_k1"}
+    assert "input_s3_k1" in cal["per_subject"]["sub5"] and cal["per_subject"]["sub5"]["text_overlap_5gram"] < 0.5
+    assert set(res["runs"][2]["calibration"]["summary_test_subjects"]) == {"zero", "bn_k1"}
     assert (tmp_path / "model_seed0_single.pt").exists() and (tmp_path / "eval_embeddings_seed0_sentence.pt").exists()

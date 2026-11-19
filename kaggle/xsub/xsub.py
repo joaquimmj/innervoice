@@ -17,7 +17,15 @@ import h5py, numpy as np, torch, torch.nn as nn, torch.nn.functional as F
 # "timing": NO MEG at all; the model only sees annotation-derived word timing (gap to previous/next onset, duration)
 #           with sentence segmentation. Measures how much of the score the transcript's rhythm explains by itself.
 # v1 (3 seeds of sentence/chunk, results/phase2_xsub_v1) showed the 7 s shift control stays far above chance.
-RUNS = [(0, "single"), (1, "single"), (2, "single"), (0, "timing"), (1, "timing"), (2, "timing"), (0, "sentence"), (0, "chunk")]
+# v2 (results/phase2_xsub_v2): timing-only model beats every MEG model; context models read window timing (known
+#     shortcut, arXiv 2609.40359). From here on only timing-free "single" models are used.
+# "single_multi": like "single", but the first recording of each validation subject is added to the training set.
+# Every "single*" run is followed by the calibration study (see calibration_study).
+RUNS = [(0, "single"), (1, "single"), (2, "single"), (0, "single_multi"), (1, "single_multi"), (2, "single_multi")]
+CAL_MINUTES = [1, 5, 10]
+# (method, steps, lr). zero: no adaptation. bn: BatchNorm statistics re-estimated on the calibration MEG (no labels).
+# input: bn + a 306x306 input mixing matrix (init identity) fitted on labelled calibration words. full: bn + all weights.
+CAL_GRID = [("bn", 0, 0.0), ("input", 100, 1e-3), ("input", 300, 1e-3), ("full", 100, 1e-4), ("full", 300, 1e-4)]
 TRAIN_TASKS = ["Sherlock2", "Sherlock3", "Sherlock4", "Sherlock5", "Sherlock6", "Sherlock7"]  # sub-0, != test book
 N_HELDOUT_SUB0 = 2  # last sub-0 training recordings (sorted by name) kept out: in-subject sanity check
 VAL_SUBJECTS = [1, 2, 3, 4]  # model selection (epoch, prior temperature); never used for the reported test numbers
@@ -32,7 +40,8 @@ OUT = os.environ.get("XSUB_OUT", "/kaggle/working" if os.path.isdir("/kaggle/wor
 SMOKE = os.environ.get("XSUB_SMOKE") == "1"  # tiny CPU run on synthetic data (tests/test_xsub.py)
 if SMOKE:
     STEPS, EVAL_EVERY, BATCH_SEGS, N_NEG, RETRIEVAL_SIZES = 30, 15, 8, 16, [5, 10]
-    RUNS = [(0, "sentence"), (0, "single"), (0, "timing")]
+    RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "single_multi"), (0, "timing")], [1]
+    CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4)]
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 WIN, ON = int((PRE + POST) * FS), int(PRE * FS)
 t_start = time.time()
@@ -115,7 +124,7 @@ E = F.normalize(E - E[:n_train_types].mean(0, keepdim=True), dim=-1).to(dev)  # 
 
 def segments(group, mode):
     """Segments of <= MAXW consecutive words (split at sentence ends in "sentence" mode): list of (rec, [word indices])."""
-    segs, by_sentence, maxw = [], mode in ("sentence", "timing"), 1 if mode == "single" else MAXW
+    segs, by_sentence, maxw = [], mode in ("sentence", "timing"), 1 if mode.startswith("single") else MAXW
     for r in group:
         cur, last = [], None
         for i, (_, _, sent, _) in enumerate(r["words"]):
@@ -171,6 +180,7 @@ class Decoder(nn.Module):
     def __init__(self, use_pos, timing_only=False):
         super().__init__()
         d, D, self.use_pos, self.timing_only = D_CONV, D_EMB, use_pos, timing_only
+        self.A = None  # optional per-subject input mixing matrix (calibration)
         self.tim = nn.Sequential(nn.Linear(3, D), nn.GELU(), nn.Linear(D, D), nn.GELU())
         self.cnn = nn.Sequential(nn.Conv1d(306, d, 1), nn.BatchNorm1d(d), nn.GELU(), Block(d), Block(d), Block(d),
                                  nn.Conv1d(d, d // 2, 5, 2, 2), nn.BatchNorm1d(d // 2), nn.GELU(),
@@ -183,6 +193,8 @@ class Decoder(nn.Module):
         self.logit_scale = nn.Parameter(torch.tensor(math.log(20.0)))
 
     def forward(self, x, gi, pad, tf):
+        if self.A is not None:
+            x = torch.einsum("ij,bjt->bit", self.A, x)
         e = self.tim(tf) if self.timing_only else self.cnn(x)  # (N, D)
         h = e[gi] * (~pad)[..., None] + (self.pos.weight[None] if self.use_pos else 0)
         e = (e[gi] + self.norm(self.ctx(h, src_key_padding_mask=pad)))[~pad]  # (N, D), order of x preserved
@@ -198,10 +210,10 @@ def balanced_topk(scores, labels, k):
 
 
 @torch.no_grad()
-def embed(model, group, mode, control=None):
+def embed(model, group, mode, control=None, segs=None):
     model.eval()
     zs, ys = [], []
-    segs = segments(group, mode)
+    segs = segments(group, mode) if segs is None else segs
     for i in range(0, len(segs), 128):
         x, y, gi, pad, tf = batch(segs[i:i + 128], control)
         with torch.autocast(dev, dtype=torch.float16, enabled=dev == "cuda"):
@@ -239,6 +251,77 @@ val_keys = [f"sub{s}" for s in VAL_SUBJECTS if f"sub{s}" in eval_groups]
 test_keys = [k for k in eval_groups if k != "sub0_heldout" and k not in val_keys]
 
 
+# ---------------------------------------------------------------- calibration study (timing-free models only)
+# Per subject: recording A (first session) provides the first K minutes as calibration; recording B (other session,
+# different part of the book) is the evaluation set, identical for every K and method.
+subject_recs = {k: sorted(g, key=lambda r: r["name"]) for k, g in eval_groups.items() if k != "sub0_heldout" and len(g) >= 2}
+multi_recs = [subject_recs[k][0] for k in subject_recs if k in [f"sub{s}" for s in VAL_SUBJECTS]]
+
+
+def ngram_overlap(a, b, n=5):
+    grams = lambda r: {tuple(w for w, *_ in r["words"][i:i + n]) for i in range(len(r["words"]) - n + 1)}
+    ga, gb = grams(a), grams(b)
+    return len(ga & gb) / max(1, len(gb))
+
+
+def adapt_and_score(state, cal, ev, method, steps, lr, tau, seed):
+    model = Decoder(use_pos=False).to(dev)
+    model.load_state_dict(state)
+    model.eval()
+    if method != "zero":
+        for m in model.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.reset_running_stats(); m.momentum = None; m.train()  # cumulative average over the calibration set
+        with torch.no_grad():
+            for i in range(0, len(cal), 256):
+                x, _, gi, pad, tf = batch(cal[i:i + 256])
+                model(x, gi, pad, tf)
+        model.eval()
+    if steps:
+        if method == "input":
+            model.requires_grad_(False)
+            model.A = nn.Parameter(torch.eye(306, device=dev))
+        opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0)
+        r = np.random.default_rng(seed)
+        for _ in range(steps):  # eval mode: fixed BatchNorm statistics, no dropout
+            x, y, gi, pad, tf = batch([cal[i] for i in r.integers(0, len(cal), min(256, len(cal)))])
+            cand = torch.unique(torch.cat([y, torch.multinomial(neg_p, min(N_NEG, n_train_types)).to(dev)]))
+            loss = F.cross_entropy(model.logit_scale.exp().clamp(max=100) * model(x, gi, pad, tf) @ E[cand].T,
+                                   torch.searchsorted(cand, y))
+            opt.zero_grad(set_to_none=True); loss.backward(); opt.step()
+    sc = score(*embed(model, None, None, segs=ev), tau, torch.Generator(device=dev).manual_seed(seed))
+    return {k: v["bal_top10"] for k, v in sc.items() if isinstance(v, dict)}
+
+
+def calibration_study(state, tau, seed, grid):
+    table = {}
+    for k, (ra, rb) in ((k, v[:2]) for k, v in subject_recs.items()):
+        ev = [(rb, [i]) for i in range(len(rb["words"]))]
+        row = {"zero": adapt_and_score(state, [], ev, "zero", 0, 0.0, tau, seed), "text_overlap_5gram": ngram_overlap(ra, rb)}
+        for minutes in CAL_MINUTES:
+            cal = [(ra, [i]) for i, w in enumerate(ra["words"]) if w[1] + WIN <= minutes * 60 * FS]
+            if len(cal) < 8:
+                continue
+            for method, steps, lr in grid:
+                row[f"{method}_s{steps}_k{minutes}"] = dict(adapt_and_score(state, cal, ev, method, steps, lr, tau, seed), n_cal_words=len(cal))
+        table[k] = row
+        print("calib", seed, k, {a: (round(b.get(f"top{RETRIEVAL_SIZES[0]}", 0), 3) if isinstance(b, dict) else round(b, 3)) for a, b in row.items()}, flush=True)
+    # per (method, K): hyper-parameters chosen on validation subjects, reported on test subjects
+    n0, n1 = f"top{RETRIEVAL_SIZES[0]}", f"top{RETRIEVAL_SIZES[1]}"
+    mean = lambda keys, name, n: float(np.mean([table[k][name][n] for k in keys if name in table.get(k, {}) and n in table[k][name]] or [np.nan]))
+    cal_test = [k for k in test_keys if k in table]
+    summary = {"zero": {n: dict(mean=mean(cal_test, "zero", n), sd=float(np.std([table[k]["zero"][n] for k in cal_test]))) for n in (n0, n1)}}
+    for minutes in CAL_MINUTES:
+        for method in sorted({g[0] for g in grid}):
+            names = [f"{m}_s{st}_k{minutes}" for m, st, _ in grid if m == method]
+            best_name = max(names, key=lambda nm: -1 if np.isnan(mean(val_keys, nm, n0)) else mean(val_keys, nm, n0))
+            vals = {n: [table[k][best_name][n] - table[k]["zero"][n] for k in cal_test if best_name in table[k]] for n in (n0, n1)}
+            summary[f"{method}_k{minutes}"] = dict(chosen=best_name, **{n: dict(mean=mean(cal_test, best_name, n),
+                                                   gain_vs_zero_mean=float(np.mean(vals[n] or [np.nan])), gain_vs_zero_sd=float(np.std(vals[n] or [np.nan])),
+                                                   n_subjects=len(vals[n])) for n in (n0, n1)})
+    return dict(summary_test_subjects=summary, per_subject=table)
+
+
 def run(seed, mode):
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
     t0 = time.time()
@@ -246,11 +329,11 @@ def run(seed, mode):
     opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WD)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, LR, total_steps=STEPS, pct_start=0.05)
     scaler = torch.amp.GradScaler(enabled=dev == "cuda")
-    train_segs = segments(train_recs, mode)
+    train_segs = segments(train_recs + (multi_recs if mode == "single_multi" else []), mode)
     history, best, n0 = [], dict(score=-1), RETRIEVAL_SIZES[0]
     for step in range(1, STEPS + 1):
         model.train()
-        n_segs = BATCH_SEGS * (MAXW // 2 if mode == "single" else 1)  # similar number of words per step in every mode
+        n_segs = BATCH_SEGS * (MAXW // 2 if mode.startswith("single") else 1)  # similar number of words per step in every mode
         x, y, gi, pad, tf = batch([train_segs[i] for i in rng.integers(0, len(train_segs), n_segs)])
         cand = torch.unique(torch.cat([y, torch.multinomial(neg_p, min(N_NEG, n_train_types)).to(dev)]))
         with torch.autocast(dev, dtype=torch.float16, enabled=dev == "cuda"):
@@ -306,7 +389,10 @@ def run(seed, mode):
     tag = f"seed{seed}_{mode}"
     torch.save(dict(state=model.state_dict(), types=all_types, n_train_types=n_train_types, tau=tau, mode=mode), f"{OUT}/model_{tag}.pt")
     torch.save(emb_out, f"{OUT}/eval_embeddings_{tag}.pt")
-    return dict(seed=seed, mode=mode, selected=dict(step=best.get("step"), tau=tau, val_score=best["score"]),
+    calibration = None
+    if mode.startswith("single") and subject_recs:
+        calibration = calibration_study(model.state_dict(), tau, seed, CAL_GRID if mode == "single" else CAL_GRID[:1])
+    return dict(seed=seed, mode=mode, selected=dict(step=best.get("step"), tau=tau, val_score=best["score"]), calibration=calibration,
                 summary_test_subjects=summarise(per_subject),
                 controls_test_subjects={c: summarise(t) for c, t in controls.items()},
                 per_subject=per_subject, history=history, minutes=round((time.time() - t0) / 60, 1))
@@ -323,4 +409,5 @@ for seed, mode in RUNS:
     json.dump(result, open(f"{OUT}/xsub_result.json", "w"), indent=1)
     r = result["runs"][-1]
     print(json.dumps(dict(seed=seed, mode=mode, selected=r["selected"], summary=r["summary_test_subjects"],
-                          controls=r["controls_test_subjects"]), indent=1), flush=True)
+                          controls=r["controls_test_subjects"],
+                          calibration=r["calibration"] and r["calibration"]["summary_test_subjects"]), indent=1), flush=True)
