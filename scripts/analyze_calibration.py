@@ -46,6 +46,14 @@ def main():
             v = per_subject(runs, subjects, n, m)
             if v:
                 print(f"  {n:32s} abs {100 * np.mean(list(v.values())):6.2f}  gain {fmt(summarise({k: v[k] - zero[k] for k in v}))}")
+        for mode, ens in d.get("ensembles", {}).items():
+            rows = ens["per_subject"]
+            ez = {k: rows[k]["zero"][m] for k in subjects if k in rows and m in rows[k]["zero"]}
+            for name in sorted({n for r in rows.values() for n in r}):
+                v = {k: rows[k][name][m] for k in subjects if k in rows and name in rows[k] and m in rows[k][name]}
+                if v:
+                    g = summarise({k: v[k] - zero[k] for k in v if k in zero})
+                    print(f"  ensemble[{mode}] {name:18s} abs {100 * np.mean(list(v.values())):6.2f}  gain vs single-model zero {fmt(g)}")
         for x, y in a.vs:
             vx, vy = per_subject(runs, subjects, x, m), per_subject(runs, subjects, y, m)
             common = sorted(set(vx) & set(vy))

@@ -54,7 +54,7 @@ OUT = os.environ.get("XSUB_OUT", "/kaggle/working" if os.path.isdir("/kaggle/wor
 SMOKE = os.environ.get("XSUB_SMOKE") == "1"  # tiny CPU run on synthetic data (tests/test_xsub.py)
 if SMOKE:
     STEPS, EVAL_EVERY, BATCH_SEGS, N_NEG, RETRIEVAL_SIZES = 30, 15, 8, 16, [5, 10]
-    RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing")], [1]
+    RUNS, CAL_MINUTES = [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing"), (1, "single")], [1]
     VAL_SUBJECTS, TEST_SUBJECTS, POOL = [1], [5], [1]
     AGG_VOCAB, AGG_NS = 10, [1, 2]
     CAL_GRID = [("bn", 0, 0.0), ("input", 3, 1e-3), ("full", 3, 1e-4), ("align", 0, 0.1), ("alignfull", 3, 1e-4),
@@ -522,6 +522,44 @@ result = dict(config=dict(train_tasks=TRAIN_TASKS, val_subjects=VAL_SUBJECTS, st
               data=dict(train_words=sum(train_counts.values()), train_types=n_train_types, unseen_types=len(test_types),
                         chance_unseen_top10=min(1.0, 10 / max(1, len(test_types)))),
               test_subjects=test_keys, device=dev, runs=[])
+@torch.no_grad()
+def ensemble_study(tags, minutes_list):
+    """Average the unit embeddings of several trained models (same mode), zero-shot and after ridge alignment.
+    The alignment map depends only on the MEG, so it is fitted once per subject and K and shared by all models."""
+    models = []
+    for tag in tags:
+        ck = torch.load(f"{OUT}/model_{tag}.pt", map_location=dev, weights_only=False)
+        m = Decoder(use_pos=False).to(dev); m.load_state_dict(ck["state"]); m.eval(); models.append((m, ck["tau"]))
+    tau = float(np.mean([t for _, t in models]))
+    gen = lambda: torch.Generator(device=dev).manual_seed(0)
+
+    def ens(ev, W=None):
+        zs = []
+        for m, _ in models:
+            m.A = None if W is None else nn.Parameter(W, requires_grad=False)
+            z, y = embed(m, None, None, segs=ev)
+            zs.append(z.float())
+        return F.normalize(torch.stack(zs).mean(0), dim=-1), y
+
+    table = {}
+    for k in val_keys + test_keys:
+        if k not in subject_recs:
+            continue
+        ra, rb = subject_recs[k][:2]
+        ev = [(rb, [i]) for i in range(len(rb["words"]))]
+        row = {"zero": {n: v["bal_top10"] for n, v in score(*ens(ev), tau, gen()).items() if isinstance(v, dict)}}
+        for minutes in minutes_list:
+            if ra["x"].shape[1] < minutes * 60 * FS:
+                continue
+            cal = [(ra, [i]) for i, w in enumerate(ra["words"]) if w[1] + WIN <= minutes * 60 * FS]
+            W, n_pairs, _ = fit_alignment(cal, 0.1)
+            if W is not None:
+                row[f"align_k{minutes}"] = {n: v["bal_top10"] for n, v in score(*ens(ev, W), tau, gen()).items() if isinstance(v, dict)}
+        table[k] = row
+        print("ensemble", k, {a: round(b.get(f"top{RETRIEVAL_SIZES[0]}", 0), 3) for a, b in row.items()}, flush=True)
+    return dict(tags=tags, per_subject=table)
+
+
 for seed, mode in RUNS:
     result["runs"].append(run(seed, mode))
     result["minutes"] = round((time.time() - t_start) / 60, 1)
@@ -530,3 +568,11 @@ for seed, mode in RUNS:
     print(json.dumps(dict(seed=seed, mode=mode, selected=r["selected"], summary=r["summary_test_subjects"],
                           controls=r["controls_test_subjects"],
                           calibration=r["calibration"] and r["calibration"]["summary_test_subjects"]), indent=1), flush=True)
+
+by_mode = collections.defaultdict(list)
+for seed, mode in RUNS:
+    by_mode[mode].append(f"seed{seed}_{mode}")
+for mode, tags in by_mode.items():
+    if len(tags) > 1 and mode.startswith(("single", "multi")) and subject_recs:
+        result.setdefault("ensembles", {})[mode] = ensemble_study(tags, CAL_MINUTES)
+        json.dump(result, open(f"{OUT}/xsub_result.json", "w"), indent=1)

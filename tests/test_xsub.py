@@ -38,7 +38,7 @@ def test_xsub_smoke(tmp_path):
     assert r.returncode == 0, r.stderr[-3000:]
     res = json.loads((tmp_path / "xsub_result.json").read_text())
     assert res["test_subjects"] == ["sub5"] and res["data"]["unseen_types"] == 2
-    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing")]
+    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing"), (1, "single")]
     for r in res["runs"]:
         top = r["per_subject"]["sub5"]["top5"]
         assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0
@@ -51,4 +51,6 @@ def test_xsub_smoke(tmp_path):
     assert al["n_aligned_words"] >= 50 and al["onset_interval_mismatch_s"] == 0
     assert "input_s3_lr0.001_k1" in cal["per_subject"]["sub5"] and cal["per_subject"]["sub5"]["text_overlap_5gram"] < 0.5
     assert set(res["runs"][2]["calibration"]["summary_test_subjects"]) == {"zero", "bn_k1"}
+    ens = res["ensembles"]["single"]
+    assert ens["tags"] == ["seed0_single", "seed1_single"] and "align_k1" in ens["per_subject"]["sub5"]
     assert (tmp_path / "model_seed0_single.pt").exists() and (tmp_path / "eval_embeddings_seed0_sentence.pt").exists()
