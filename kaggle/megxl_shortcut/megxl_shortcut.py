@@ -83,12 +83,50 @@ if EVAL_MAX:
             dataset = torch.utils.data.Subset(dataset, sorted(idx.tolist()))
         return _DL(dataset, *a, shuffle=shuffle, **k)
     ev.DataLoader = capped_loader
+# fp16 instead of their bf16 autocast: bf16 attention crashes on T4 ("unspecified launch failure"), fp16 ran in
+# Phase 1. Dynamic loss scaling on the gradient only (logged loss values are unchanged); overflow -> step skipped.
+_autocast, _clip, scale = torch.autocast, torch.nn.utils.clip_grad_norm_, dict(s=2.0 ** 12, good=0, skipped=0)
+
+
+class ScaleGrad(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x):
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(ctx, g):
+        return g * scale["s"]
+
+
+def unscale_and_clip(params, max_norm, *a, **k):
+    params = [p for p in params if p.grad is not None]
+    for p in params:
+        p.grad.div_(scale["s"])
+    if not all(torch.isfinite(p.grad).all() for p in params):
+        for p in params:
+            p.grad = None  # AdamW skips parameters without gradient
+        scale.update(s=scale["s"] / 2, good=0, skipped=scale["skipped"] + 1)
+        return torch.tensor(float("inf"))
+    scale["good"] += 1
+    if scale["good"] % 200 == 0:
+        scale["s"] = min(scale["s"] * 2, 2.0 ** 16)
+    return _clip(params, max_norm, *a, **k)
+
+
+torch.nn.utils.clip_grad_norm_ = unscale_and_clip
 _step, step_times = ev.training_step, []
 def timed_step(*a, **k):
     torch.cuda.synchronize(); t = time.time()
-    out = _step(*a, **k)
-    torch.cuda.synchronize(); step_times.append(time.time() - t)
-    return out
+    torch.autocast = lambda device_type, dtype=None, **kw: _autocast(
+        device_type, dtype=torch.float16 if dtype == torch.bfloat16 else dtype, **kw)
+    try:
+        loss, *rest = _step(*a, **k)
+    finally:
+        torch.autocast = _autocast
+    if loss.requires_grad:
+        loss = ScaleGrad.apply(loss)
+        torch.cuda.synchronize(); step_times.append(time.time() - t)
+    return (loss, *rest)
 ev.training_step = timed_step
 
 
@@ -175,7 +213,7 @@ metrics = ev.main.__wrapped__(cfg)
 out = dict(signal=SIGNAL, order=ORDER, train_pct=TRAIN_PCT, epochs=EPOCHS, eval_max=EVAL_MAX, seed=SEED,
            megxl_commit=MEGXL_COMMIT, hours=round((time.time() - t0) / 3600, 2),
            train_step_s_median=round(sorted(step_times)[len(step_times) // 2], 2) if step_times else None,
-           train_steps=len(step_times), peak_GiB=[round(torch.cuda.max_memory_allocated(i) / 2**30, 2) for i in range(2)],
+           train_steps=len(step_times), fp16_skipped_steps=scale["skipped"], final_loss_scale=scale["s"], peak_GiB=[round(torch.cuda.max_memory_allocated(i) / 2**30, 2) for i in range(2)],
            test_metrics_at_best_val={k: float(v) for k, v in (metrics or {}).items()})
 json.dump(out, open(f"{W}/shortcut_result.json", "w"), indent=1)
 print(json.dumps(out, indent=1))
