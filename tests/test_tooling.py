@@ -34,3 +34,13 @@ def test_apply_overrides():
 
 def test_apply_overrides_tolerates_spaces():
     assert kaggle_run.apply_overrides("A, B = 1, 2\n", ["A, B = 3, 4"]) == "A, B = 3, 4\n"
+
+
+def test_analyze_calibration_summarise():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import analyze_calibration as ac
+    runs = [{"calibration": {"per_subject": {"s1": {"zero": {"top50": 0.2}, "m": {"top50": 0.3}},
+                                             "s2": {"zero": {"top50": 0.2}, "m": {"top50": 0.1}}}}}]
+    g = {k: ac.per_subject(runs, ["s1", "s2"], "m", "top50")[k] - 0.2 for k in ("s1", "s2")}
+    s = ac.summarise(g)
+    assert abs(s["mean"]) < 1e-9 and s["improved"] == 1 and s["n"] == 2 and s["lo"] <= 0 <= s["hi"]
