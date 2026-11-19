@@ -30,3 +30,7 @@ def test_scan_deletes_leaked_outputs(tmp_path):
 def test_apply_overrides():
     code = "A = 1\nB = 'x'\n    A = 5\n"
     assert kaggle_run.apply_overrides(code, ["A=2"]) == "A = 2\nB = 'x'\n    A = 5\n"
+
+
+def test_apply_overrides_tolerates_spaces():
+    assert kaggle_run.apply_overrides("A, B = 1, 2\n", ["A, B = 3, 4"]) == "A, B = 3, 4\n"

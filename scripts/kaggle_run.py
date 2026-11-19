@@ -27,7 +27,7 @@ def parse_status(out):
 
 def apply_overrides(code, sets):
     for item in sets:
-        name, value = item.split("=", 1)
+        name, value = (x.strip() for x in item.split("=", 1))
         code, n = re.subn(rf"(?m)^{re.escape(name)} = .*$", lambda m: f"{name} = {value}", code)
         if n != 1:
             sys.exit(f"--set {name}: expected exactly one top-level assignment, found {n}")
