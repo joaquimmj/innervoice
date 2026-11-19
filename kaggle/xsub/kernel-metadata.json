@@ -11,6 +11,7 @@
   "competition_sources": [],
   "kernel_sources": [
     "joaquimmanjijung/innervoice-libribrain-prep",
-    "joaquimmanjijung/innervoice-libribrain2-prep"
+    "joaquimmanjijung/innervoice-libribrain2-prep",
+    "joaquimmanjijung/innervoice-libribrain2c-prep"
   ]
 }

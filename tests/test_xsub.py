@@ -37,7 +37,7 @@ def test_xsub_smoke(tmp_path):
     assert r.returncode == 0, r.stderr[-3000:]
     res = json.loads((tmp_path / "xsub_result.json").read_text())
     assert res["test_subjects"] == ["sub5"] and res["data"]["unseen_types"] == 2
-    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "single_multi"), (0, "timing")]
+    assert [(r["seed"], r["mode"]) for r in res["runs"]] == [(0, "sentence"), (0, "single"), (0, "multi1"), (0, "timing")]
     for r in res["runs"]:
         top = r["per_subject"]["sub5"]["top5"]
         assert 0 <= top["bal_top10"] <= 1 and top["chance_top10"] == 1.0

@@ -1,0 +1,288 @@
+{
+ "megxl_commit": "97da04171d22e8fe4822cfeb3047a57ecf86b318",
+ "recordings": [
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-13_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-13_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-14_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-14_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-15_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-15_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-16_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.0,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-16_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-17_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-17_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-18_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-18_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-19_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-19_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.4,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-20_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-20_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-21_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.5,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-21_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.4,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-22_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 11.6,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-22_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firsthalf_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 12.4,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-23_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-23_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-24_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-24_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-25_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.7,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-25_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-26_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-26_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.2,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-27_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-27_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.2,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-28_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-28_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-29_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-29_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.1,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-30_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-30_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.3,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-31_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.8,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-31_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.2,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-32_ses-11_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 5.9,
+   "finite": true
+  },
+  {
+   "path": "Sherlock1/derivatives/serialised_competition/sub-32_ses-12_task-Sherlock1_run-1_proc-bads+headpos+sss+notch+bp+ds_desc-firstquarter_meg.h5",
+   "ok": true,
+   "n_channels": 306,
+   "minutes": 6.4,
+   "finite": true
+  }
+ ],
+ "hours": 6.03,
+ "cache_GiB": 1.24,
+ "disk_free_GiB": 18.2
+}
