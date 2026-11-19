@@ -58,3 +58,18 @@ qualitative pattern is already public in that repo. Our result is a quantified r
 To reconcile before any write-up: (1) our embedding-averaging null vs their posterior-averaging gain; (2) report
 against input-free controls (our noise control = 20 %), not only nominal chance; (3) re-check after 2026-12-01.
 Not searched: bioRxiv, OpenReview, Scholar citations, Kaggle discussions.
+
+## 2026-11-19 — check of label-free functional alignment to a reference subject → method published, positive MEG result not found
+Sub-agent: arXiv abstracts (2309.00627, 2312.06467, 2607.19394, 2608.22420, 2609.30832), LibriBrain100 HTML grep,
+rohit-ravi2/libribrain-2026 PREDICTIONS/REPORT/RUNS; others snippet only (marked).
+- **Method is not new.** Ferrante et al., "Through their eyes" (arXiv 2309.00627, 2023; Imaging Neuroscience 2024):
+  fMRI, decoder trained on one subject, others mapped onto it by ridge / hyperalignment on shared images; ridge best.
+  Thual et al. (2312.06467, fMRI, FUGW). Heo et al. (2607.19394, ECoG speech, SRM shared space, decoder reused without
+  retraining). MEG: Ravishankar, Toneva & Wehbe 2021 (pairwise maps on shared stimulus, denoising; snippet), Michalke &
+  Rieger 2023 (MCCA, grasping; snippet), de Cheveigné MCCA (snippet). Haxby 2011, Chen 2015 SRM to cite.
+- **Same recipe on LibriBrain, public null:** rohit-ravi2 P1b (2026-10-04): label-free ridge map new subject → sub-0 on
+  shared Sherlock1 audio, frozen sub-0 decoder: 0.265–0.274 vs floor 0.263 → "NOT DETECTED" (their decoder: 0.498 on sub-0).
+- No published positive result found for MEG word decoding with a timing-free decoder (our +3.6/+4.3/+5.9 at 5/10/20 min).
+Verdict: method PARTIALLY published (fMRI/ECoG; MEG null in a repo). A positive, controlled MEG result + explanation of
+the null would be a modest contribution. Required before any claim: mis-paired control (running, v8), covariance-only
+control (running), Procrustes/CCA/SRM comparisons, alignment on a weaker decoder (to explain P1b), a multi-subject template.
